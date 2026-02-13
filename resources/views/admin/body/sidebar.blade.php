@@ -35,6 +35,13 @@
                     </div>
                     Categories
                 </a>
+                <a class="nav-link button-hover {{ request()->routeIs('supplier.*') ? 'active': '' }}"
+                    href="{{ route('supplier.index') }}">
+                    <div class="sb-nav-link-icon">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                    </div>
+                    Suppliers
+                </a>
                 <!-- SALES -->
                 <div class="sb-sidenav-menu-heading">Sales</div>
                 <a class="nav-link button-hover" href="#">
