@@ -17,12 +17,13 @@ return new class extends Migration
             $table->string('brand')->nullable();
             $table->string('image')->nullable();
             $table->string('name');
+            $table->integer('sku')->nullable();
             $table->longText('description')->nullable();
             $table->integer('stock_quantity');
             $table->integer('minimum_stock');
             $table->float('cost_price');
             $table->float('selling_price');
-            $table->integer('sku')->nullable();
+            $table->boolean('is_active')->default(1);
             $table->timestamps();
         });
     }

@@ -79,7 +79,7 @@ class ProductsController extends Controller
     public function ProductUpdate(Request $request){
         $prod_id = $request->id;
 
-$valid = Validator::make($request->all(), [
+        $valid = Validator::make($request->all(), [
             "name" => "required",
             "brand" => "required",
             "category_id" => "required",
@@ -99,36 +99,55 @@ $valid = Validator::make($request->all(), [
                              ]);
         }
 
-        $path = null;
+        $product = Products::findOrFail($prod_id);
+
         if ($request->hasFile('image')) {
             // Delete old image if exists
-            if ($request->image && file_exists(public_path($request->image))) {
-                unlink(public_path($request->image));
+            if ($product->image && file_exists(public_path($request->image))) {
+                unlink(public_path($product->image));
             }
             $file = $request->file('image');
             $filename = time().'_'.$file->getClientOriginalName();
             $file->move(public_path('img/products'), $filename);
-            $request->image = 'assets/img/products/'.$filename;
+            $product->image = 'img/products/'.$filename;
         }
+            $product->name = $request->name;
+            $product->brand = $request->brand;
+            $product->category_id = $request->category_id;
+            $product->sku = $request->sku;
+            $product->description = $request->description;
+            $product->stock_quantity = $request->stock_quantity;
+            $product->minimum_stock = $request->minimum_stock;
+            $product->cost_price = $request->cost_price;
+            $product->selling_price = $request->selling_price;
 
-
-        Products::create([
-            "name" => $request->name,
-            "image" => $path,
-            "brand" => $request->brand,
-            "category_id" => $request->category_id,
-            "sku" => $request->sku,
-            "description" => $request->description,
-            "stock_quantity" => $request->stock_quantity,
-            "minimum_stock" => $request->minimum_stock,
-            "cost_price" => $request->cost_price,
-            "selling_price" => $request->selling_price,
-        ]);
+            $product->save();
 
         return redirect()->route('products.index')
                          ->with([
-                            'message' => 'Product Added Successfully!',
+                            'message' => 'Product Updated Successfully!',
                             'alert-type' => 'success',
+                        ]);
+    }
+
+    public function ProductStatus($id){
+
+        $product = Products::findOrFail($id);
+
+        if($product->is_active == 1){
+            $product->update([
+                'is_active' => 0
+            ]);
+            }elseif($product->is_active == 0){
+                $product->update([
+                    'is_active' => 1
+                    ]);
+        }
+
+        return redirect()->route('products.index')
+                         ->with([
+                            'message' => 'Product Disabled Successfully!',
+                            'alert-type' => 'warning',
                         ]);
     }
 }

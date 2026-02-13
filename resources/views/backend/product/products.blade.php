@@ -56,11 +56,24 @@ $i = 1;
                                     @else
                                     <span class="badge bg-success">In Stock</span>
                                     @endif
+                                    @if($prod_data->is_active == 0)
+                                    <span class="badge bg-danger">Inactive</span>
+                                    @else
+                                    <span class="badge bg-success">Active</span>
+                                    @endif
                                 </td>
                                 <td class="text-center">
                                     <button class="btn btn-sm btn-warning" id="editProduct"
                                         value="{{ $prod_data->id }}"><i class="fa-solid fa-pen-to-square"></i></button>
-                                    <button class="btn btn-sm btn-danger"><i class="fa-solid fa-trash-can"></i></button>
+                                    @if($prod_data->is_active == 0)
+                                    <a href="{{ route('products.status', $prod_data->id) }}"
+                                        class="btn btn-sm btn-danger" id="disable"><i
+                                            class="fa-solid fa-circle-minus"></i></a>
+                                    @elseif($prod_data->is_active == 1)
+                                    <a href="{{ route('products.status', $prod_data->id) }}"
+                                        class="btn btn-sm btn-success" id="disable"><i
+                                            class="fa-solid fa-circle-plus"></i></a>
+                                    @endif
                                 </td>
                             </tr>
                             @endforeach
@@ -213,8 +226,7 @@ $(document).ready(function() {
                 $("#stock_quantity").val(res.data.stock_quantity);
                 $("#minimum_stock").val(res.data.minimum_stock);
                 $("#id").val(prod_id);
-
-                $("#productForm").attr("action", "{{ route('') }}")
+                $("#productForm").attr("action", "{{ route('products.update') }}")
             }
         });
     });

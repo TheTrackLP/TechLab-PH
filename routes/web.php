@@ -38,6 +38,8 @@ Route::middleware('auth')->group(function(){
             Route::get('/admin/products', 'ProductsIndex')->name('products.index');
             Route::post('/admin/products/store', 'ProductsStore')->name('products.store');
             Route::get('/admin/products/edit/{id}', 'ProductEdit')->name('products.edit');
+            Route::post('/admin/products/update', 'ProductUpdate')->name('products.update');
+            Route::get('/admin/products/disable/{id}', 'ProductStatus')->name('products.status');
     });
 });
 
