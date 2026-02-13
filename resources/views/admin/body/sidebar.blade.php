@@ -21,7 +21,8 @@
                 </a>
                 <!-- INVENTORY -->
                 <div class="sb-sidenav-menu-heading">Inventory</div>
-                <a class="nav-link button-hover" href="">
+                <a class="nav-link button-hover {{ request()->routeIs('products.*') ? 'active' : '' }}"
+                    href="{{ route('products.index') }}">
                     <div class="sb-nav-link-icon">
                         <i class="fas fa-boxes"></i>
                     </div>
