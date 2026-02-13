@@ -20,13 +20,66 @@ class CategoriesController extends Controller
         ]);
 
         if($valid->fails()){
-            return redirect()->route('category.index');
+            return redirect()->route('category.index')
+                             ->with([
+                                'message'=>'Error, Try Again!',
+                                'alert-type'=>'error',
+                             ]);
         }
 
         Categories::create([
             'category_name' => $request->category_name,
             'category_description' => $request->category_description,
         ]);
-            return redirect()->route('category.index');
+        
+        return redirect()->route('category.index')
+                         ->with([
+                            'message'=>'Category Added Successfully!',
+                            'alert-type'=>'success',
+                         ]);
+    }
+
+    public function CategoriesEdit($id){
+        $data = Categories::findOrFail($id);
+
+        return response()->json([
+            'data'=>$data
+        ]);
+    }
+
+    public function CategoriesUpdate(Request $request){
+        $cat_id = $request->id;
+        $valid = Validator::make($request->all(), [
+            'category_name' => 'required',
+        ]);
+
+        if($valid->fails()){
+            return redirect()->route('category.index')
+                             ->with([
+                                'message'=>'Error, Try Again!',
+                                'alert-type'=>'error',
+                             ]);
+        }
+
+        Categories::findOrFail($cat_id)->update([
+            'category_name' => $request->category_name,
+            'category_description' => $request->category_description,
+        ]);
+        
+        return redirect()->route('category.index')
+                         ->with([
+                            'message'=>'Category Updated Successfully!',
+                            'alert-type'=>'success',
+                         ]);
+    }
+
+    public function CategoriesDelete($id){
+        Categories::findOrFail($id)->delete();
+
+        return redirect()->route('category.index')
+                         ->with([
+                            'message'=>'Category Deleted Successfully!',
+                            'alert-type'=>'warning',
+                         ]);
     }
 }

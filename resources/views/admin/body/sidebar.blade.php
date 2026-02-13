@@ -21,14 +21,14 @@
                 </a>
                 <!-- INVENTORY -->
                 <div class="sb-sidenav-menu-heading">Inventory</div>
-                <a class="nav-link button-hover {{ request()->routeIs('category.*') ? 'active': '' }}"
-                    href="{{ route('category.index') }}">
+                <a class="nav-link button-hover" href="">
                     <div class="sb-nav-link-icon">
                         <i class="fas fa-boxes"></i>
                     </div>
                     Products
                 </a>
-                <a class="nav-link button-hover" href="">
+                <a class="nav-link button-hover {{ request()->routeIs('category.*') ? 'active': '' }}"
+                    href="{{ route('category.index') }}">
                     <div class="sb-nav-link-icon">
                         <i class="fas fa-tags"></i>
                     </div>
