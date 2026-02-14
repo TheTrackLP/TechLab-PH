@@ -46,6 +46,9 @@ Route::middleware('auth')->group(function(){
     Route::controller(SupplierController::class)->group(function(){
         Route::get('/admin/suppliers', 'SupplierIndex')->name('supplier.index');
         Route::post('/admin/suppliers/store', 'SupplierStore')->name('supplier.store');
+        Route::get('/admin/suppliers/edit/{id}', 'SupplierEdit')->name('supplier.edit');
+        Route::post('/admin/suppliers/update', 'SupplierUpdate')->name('supplier.update');
+        Route::get('/admin/suppliers/change-status/{id}', 'SupplierStatus')->name('supplier.status');
     });
 });
 
