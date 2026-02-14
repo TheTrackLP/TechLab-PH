@@ -5,7 +5,7 @@ $(function(){
         var link = $(this).attr("href");
                   Swal.fire({
                     title: 'Are you sure?',
-                    text: "Disable This Data?",
+                    text: "Change Status This Data?",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
@@ -15,8 +15,8 @@ $(function(){
                     if (result.isConfirmed) {
                       window.location.href = link
                       Swal.fire(
-                        'Disabled!',
-                        'The Product has been disabled.',
+                        'Status Changed!',
+                        'The Product Status has been Changed.',
                         'success'
                       )
                     }

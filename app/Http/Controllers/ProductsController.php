@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Categories;
 use App\Models\Products;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -11,13 +12,16 @@ class ProductsController extends Controller
 {
     public function ProductsIndex(){
         $categories = Categories::all();
+        $suppliers = Supplier::where('is_active', 1)->get();
         $products = Products::select(
             "products.*",
-                     "categories.category_name"
+                     "categories.category_name",
+                     "Suppliers.name as supplier_name"
             )
             ->join("categories", "categories.id", "=", "products.category_id")
+            ->join("Suppliers", "Suppliers.id", "=", "products.supplier_id")
             ->get();
-        return view('backend.product.products', compact('categories', 'products'));
+        return view('backend.product.products', compact('categories', 'products', 'suppliers'));
     }
 
     public function ProductsStore(Request $request){
@@ -25,6 +29,7 @@ class ProductsController extends Controller
             "name" => "required",
             "brand" => "required",
             "category_id" => "required",
+            "supplier_id" => "required",
             "sku" => "required",
             "description" => "required",
             "stock_quantity" => "required",
@@ -54,6 +59,7 @@ class ProductsController extends Controller
             "image" => $path,
             "brand" => $request->brand,
             "category_id" => $request->category_id,
+            "supplier_id" => $request->supplier_id,
             "sku" => $request->sku,
             "description" => $request->description,
             "stock_quantity" => $request->stock_quantity,
@@ -83,6 +89,7 @@ class ProductsController extends Controller
             "name" => "required",
             "brand" => "required",
             "category_id" => "required",
+            "supplier_id" => "required",
             "sku" => "required",
             "description" => "required",
             "stock_quantity" => "required",
@@ -114,6 +121,7 @@ class ProductsController extends Controller
             $product->name = $request->name;
             $product->brand = $request->brand;
             $product->category_id = $request->category_id;
+            $product->supplier_id = $request->supplier_id;
             $product->sku = $request->sku;
             $product->description = $request->description;
             $product->stock_quantity = $request->stock_quantity;
@@ -146,8 +154,8 @@ class ProductsController extends Controller
 
         return redirect()->route('products.index')
                          ->with([
-                            'message' => 'Product Disabled Successfully!',
-                            'alert-type' => 'warning',
+                            'message' => 'Product Status Changed Successfully!',
+                            'alert-type' => 'success',
                         ]);
     }
 }

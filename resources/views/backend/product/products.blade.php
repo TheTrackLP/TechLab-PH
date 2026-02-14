@@ -23,6 +23,7 @@ $i = 1;
                                 <th class="text-center">Image</th>
                                 <th class="text-center">Product</th>
                                 <th class="text-center">Category</th>
+                                <th class="text-center">Supplier</th>
                                 <th class="text-center">Stock</th>
                                 <th class="text-center">Selling Price</th>
                                 <th class="text-center">Status</th>
@@ -32,16 +33,17 @@ $i = 1;
                         <tbody>
                             @foreach ($products as $prod_data)
                             <tr>
-                                <td>{{ $i++ }}</td>
+                                <td class="text-center align-middle">{{ $i++ }}</td>
                                 <td class="text-center">
                                     <img id=""
                                         src="{{ (!empty($prod_data->image)) ? url($prod_data->image) : url('assets/img/no-image.png') }}"
                                         alt="" class="p-1 bg-primary" width="80">
                                 </td>
-                                <td>
+                                <td style="max-width: 300px; white-space: normal;">
                                     <strong>{{ $prod_data->name  }}</strong><br>
                                 </td>
                                 <td class="text-center">{{ $prod_data->category_name }}</td>
+                                <td class="text-center">{{ $prod_data->supplier_name }}</td>
                                 <td class="text-center">
                                     @if($prod_data->minimum_stock > $prod_data->stock_quantity)
                                     <span class="badge text-bg-danger">{{ $prod_data->stock_quantity }}</span>
@@ -103,23 +105,13 @@ $i = 1;
                         <div class="col-md-6">
                             <h6 class="text-muted mb-3">Basic Information</h6>
                             <div class="row g-3">
-                                <div class="col-md-8">
+                                <div class="col-md-12">
                                     <label class="form-label">Product Name</label>
                                     <input type="text" class="form-control" name="name" id="name">
                                 </div>
-
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <label class="form-label">Brand</label>
                                     <input type="text" class="form-control" name="brand" id="brand">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Category</label>
-                                    <select class="form-select modalSelect2" name="category_id" id="category_id">
-                                        <option>Select Category</option>
-                                        @foreach ($categories as $data)
-                                        <option value="{{ $data->id }}">{{ $data->category_name }}</option>
-                                        @endforeach
-                                    </select>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">SKU (Optional)</label>
@@ -129,6 +121,24 @@ $i = 1;
                                         <button class="btn btn-primary" type="button" id="createsku">Random
                                             SKU</button>
                                     </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Category</label>
+                                    <select class="form-select modalSelect2" name="category_id" id="category_id">
+                                        <option value=""></option>
+                                        @foreach ($categories as $data)
+                                        <option value="{{ $data->id }}">{{ $data->category_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Supplier</label>
+                                    <select class="form-select modalSelect2" name="supplier_id" id="supplier_id">
+                                        <option value=""></option>
+                                        @foreach ($suppliers as $data)
+                                        <option value="{{ $data->id }}">{{ $data->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                             <hr class="my-4">
@@ -214,6 +224,7 @@ $(document).ready(function() {
                 $("#name").val(res.data.name);
                 $("#brand").val(res.data.brand);
                 $("#category_id").val(res.data.category_id).trigger("change");
+                $("#supplier_id").val(res.data.supplier_id).trigger("change");
                 $("#description").val(res.data.description);
                 if (res.data.image) {
                     $("#showImage").attr('src', "{{ asset('') }}" + res.data.image);
