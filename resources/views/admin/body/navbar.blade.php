@@ -4,7 +4,7 @@
         <i class="fas fa-bars"></i>
     </button>
     <!-- Brand -->
-    <a class="navbar-brand fw-bold d-flex align-items-center m-0" href="#">
+    <a class="navbar-brand fw-bold d-flex align-items-center m-0" href="{{ route('admin.dash') }}">
         <i class="fas fa-laptop-code me-2 text-info"></i>
         TechLab <span class="text-info ms-1">PH</span>
     </a>

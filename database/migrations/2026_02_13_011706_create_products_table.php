@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('brand')->nullable();
             $table->string('image')->nullable();
             $table->string('name');
-            $table->integer('sku')->nullable();
+            $table->string('sku')->nullable();
             $table->longText('description')->nullable();
             $table->integer('stock_quantity');
             $table->integer('minimum_stock');

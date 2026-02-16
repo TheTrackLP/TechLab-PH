@@ -13,7 +13,8 @@
             <div class="nav">
                 <!-- MAIN -->
                 <div class="sb-sidenav-menu-heading">Main</div>
-                <a class="nav-link button-hover" href="#">
+                <a class="nav-link button-hover {{ request()->routeIs('admin.*') ? 'active' : '' }}"
+                    href="{{ route('admin.dash') }}">
                     <div class="sb-nav-link-icon">
                         <i class="fas fa-tachometer-alt"></i>
                     </div>
