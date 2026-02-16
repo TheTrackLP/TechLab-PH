@@ -45,7 +45,8 @@
                 </a>
                 <!-- SALES -->
                 <div class="sb-sidenav-menu-heading">Sales</div>
-                <a class="nav-link button-hover" href="#">
+                <a class="nav-link button-hover {{ request()->routeIs('sales.*') ? 'active' : '' }}"
+                    href="{{ route('sales.index') }}">
                     <div class="sb-nav-link-icon">
                         <i class="fas fa-cash-register"></i>
                     </div>

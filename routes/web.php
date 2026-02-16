@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SupplierController;
 use App\Models\Categories;
 use Illuminate\Support\Facades\Route;
@@ -49,6 +50,10 @@ Route::middleware('auth')->group(function(){
         Route::get('/admin/suppliers/edit/{id}', 'SupplierEdit')->name('supplier.edit');
         Route::post('/admin/suppliers/update', 'SupplierUpdate')->name('supplier.update');
         Route::get('/admin/suppliers/change-status/{id}', 'SupplierStatus')->name('supplier.status');
+    });
+    
+    Route::controller(SalesController::class)->group(function(){
+        Route::get('/admin/sales', 'SalesIndex')->name('sales.index');
     });
 });
 
