@@ -37,11 +37,13 @@
                                 <td class="text-center align-middle">{{ $data->stock_quantity }}</td>
                                 <td class="text-center align-middle">₱{{ number_format($data->selling_price, 2) }}</td>
                                 <td class="text-center align-middle">
-                                    <button class="btn btn-sm btn-outline-info me-1" data-bs-toggle="modal"
-                                        data-bs-target="#productInfoModal">
+                                    <button class="btn btn-sm btn-outline-info me-1" value="{{ $data->id }}"
+                                        id="getInfoProduct">
                                         <i class="fas fa-info-circle"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-primary">
+                                    <button class="btn btn-sm btn-primary addToCart" data-id="{{ $data->id }}"
+                                        data-name="{{ $data->name }}" data-price="{{ $data->selling_price }}"
+                                        data-stock="{{ $data->stock_quantity }}">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                 </td>
@@ -71,51 +73,29 @@
                                     <th width="50"></th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        Zodiac Capricorn Build Powered by ASUS - R5 7500F / 32GB DDR5 / 500GB NVMe / RTX
-                                        5060 OC PC Build
-
-                                    </td>
-                                    <td>
-                                        <input type="number" class="form-control form-control-sm" value="1">
-                                    </td>
-                                    <td>1000</td>
-                                    <td class="fw-bold">1000</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-danger">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </td>
-                                </tr>
+                            <tbody id="cartTableBody">
                             </tbody>
                         </table>
                     </div>
                 </div>
                 <!-- Totals -->
                 <div class="card-body border-top">
-
-                    <div class="d-flex justify-content-between">
-                        <span>Subtotal</span>
-                        <span class="fw-semibold">₱1,000</span>
-                    </div>
                     <div class="d-flex justify-content-between">
                         <span>Total</span>
-                        <span class="fw-bold fs-5 text-primary">₱1,000</span>
+                        <span class="fw-bold fs-5 text-primary" id="cartTotal"></span>
                     </div>
                     <hr>
                     <!-- Payment -->
                     <div class="mb-2">
                         <label class="form-label">Amount Paid</label>
-                        <input type="number" class="form-control">
+                        <input type="number" class="form-control" id="amountPaid">
                     </div>
                     <div class="d-flex justify-content-between mb-3">
                         <span>Change</span>
-                        <span class="fw-bold text-success">₱0.00</span>
+                        <span class="fw-bold text-success" id="changeDisplay">₱0.00</span>
                     </div>
                     <div class="d-grid gap-2">
-                        <button class="btn btn-success">
+                        <button class="btn btn-success" id="completeSale">
                             Complete Sale
                         </button>
                         <button class="btn btn-outline-danger">
@@ -147,20 +127,20 @@
                     </div>
                     <div class="col-md-7">
                         <h4 class="fw-bold"></h4>
-                        <p class="text-muted mb-2">SKU: KF8GB3200</p>
-                        <span class="badge bg-success mb-3">In Stock</span>
+                        <p class="text-muted mb-2" id="getSKU"></p>
+                        <span class="badge mb-3" id="getStatusStocks"></span>
                         <div class="mb-2">
-                            <strong>Brand:</strong> Kingston
+                            <strong>Brand:</strong> <span id="getBrand"></span>
                         </div>
                         <div class="mb-2">
-                            <strong>Category:</strong> RAM
+                            <strong>Category:</strong> <span id="getCategory"></span>
                         </div>
                         <div class="mb-2">
-                            <strong>Current Stock:</strong> 15 pcs
+                            <strong>Current Stock:</strong> <span id="getStocks"></span> pcs
                         </div>
                         <div class="mb-3">
                             <strong>Selling Price:</strong>
-                            <span class="fs-5 text-primary fw-bold">₱1,000</span>
+                            <span class="fs-5 text-primary fw-bold" id="getPrice"></span>
                         </div>
                         <hr>
                         <div class="accordion accordion-flush" id="accordionFlushExample">
@@ -191,10 +171,168 @@
                     <i class="fas fa-cart-plus me-1"></i> Add to Cart
                 </button>
             </div>
-
         </div>
     </div>
 </div>
 
+<!-- Add To Cart Script in POS -->
+<script>
+let cart = [];
+let total = 0;
+
+$(document).on('click', '.addToCart', function() {
+    let id = $(this).data("id");
+    let name = $(this).data("name");
+    let price = parseFloat($(this).data("price"));
+    let stock = parseInt($(this).data("stock"));
+
+    let existing = cart.find(item => item.product_id === id);
+
+    if (existing) {
+        if (existing.quantity < stock) {
+            existing.quantity += 1;
+        } else {
+            toastr.error("Error", "Stock limit reached");
+        }
+    } else {
+        cart.push({
+            product_id: id,
+            name: name,
+            price: price,
+            quantity: 1,
+            stock: stock
+        });
+    }
+
+    renderCart();
+});
+
+function renderCart() {
+    let tbody = $("#cartTableBody");
+    tbody.empty();
+
+    total = 0;
+
+    cart.forEach((item, index) => {
+        let subtotal = item.price * item.quantity;
+        total += subtotal;
+
+        tbody.append(`
+            <tr>
+                <td>${item.name}</td>
+                <td>
+                    <input type="number" class="form-control form-control-sm"
+                                    max="${item.stock}" value="${item.quantity}"
+                                    onchange="updateQty(${index}, this.value)">
+                </td>
+                <td>${item.price.toLocaleString('en-PH')}</td>
+                <td>${subtotal.toLocaleString('en-PH')}</td>
+                <td>
+                    <button onclick="removeItem(${index})" class="btn btn-sm btn-danger">X</button>
+                </td>
+            </tr>
+            `)
+    });
+
+    $("#cartTotal").text(
+        total.toLocaleString('en-PH', {
+            style: 'currency',
+            currency: 'PHP'
+        })
+    );
+    calculateChange();
+}
+
+function calculateChange() {
+
+    let paid = parseFloat($("#amountPaid").val()) || 0;
+
+    let change = paid - total;
+
+    if (change < 0) {
+        $("#changeDisplay")
+            .removeClass("text-success")
+            .addClass("text-danger")
+            .text("₱0.00");
+    } else {
+        $("#changeDisplay")
+            .removeClass("text-danger")
+            .addClass("text-success")
+            .text(
+                change.toLocaleString('en-PH', {
+                    style: 'currency',
+                    currency: 'PHP'
+                })
+            );
+    }
+    if (paid < total) {
+        $("#completeSale").prop("disabled", true);
+    } else {
+        $("#completeSale").prop("disabled", false);
+    }
+}
+$(document).on("input", "#amountPaid", function() {
+    calculateChange();
+
+});
+
+
+function updateQty(index, qty) {
+    qty = parseInt(qty);
+
+    if (qty <= cart[index].stock) {
+        cart[index].quantity = qty;
+    } else {
+        alert("Exceeds stock.");
+    }
+
+    renderCart();
+}
+
+function removeItem(index) {
+    cart.splice(index, 1);
+    renderCart();
+}
+</script>
+
+<script>
+$(document).ready(function() {
+
+    $(document).on('click', '#getInfoProduct', function() {
+        var product_id = $(this).val();
+        $("#productInfoModal").modal('show');
+        $.ajax({
+            type: "GET",
+            url: "/admin/product/info/" + product_id,
+            success: function(res) {
+                $("#getSKU").text(res.data.sku);
+                $("#getBrand").text(res.data.brand);
+                $("#getCategory").text(res.data.category_name);
+                let stock = res.data.stock_quantity;
+                let min = res.data.minimum_stock;
+                let badge = $("#getStatusStocks");
+                badge.attr("class", "badge mb-3");
+                badge.removeClass("bg-success bg-warning bg-danger");
+                if (stock == 0) {
+                    badge.addClass("bg-danger");
+                    badge.text("Out of Stock");
+                } else if (stock <= min) {
+                    badge.addClass("bg-warning text-dark");
+                    badge.text("Low Stock");
+                } else {
+                    badge.addClass("bg-success");
+                    badge.text("In Stock");
+                }
+                $("#getStocks").text(res.data.stock_quantity);
+                let formatted = res.data.selling_price.toLocaleString('en-PH', {
+                    style: 'currency',
+                    currency: 'PHP'
+                });
+                $("#getPrice").text(formatted);
+            }
+        });
+    });
+});
+</script>
 
 @endsection

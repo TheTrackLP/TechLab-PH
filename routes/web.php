@@ -54,6 +54,7 @@ Route::middleware('auth')->group(function(){
     
     Route::controller(SalesController::class)->group(function(){
         Route::get('/admin/sales', 'SalesIndex')->name('sales.index');
+        Route::get('/admin/product/info/{id}', 'getProductData');
     });
 });
 
