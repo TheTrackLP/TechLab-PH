@@ -298,6 +298,28 @@ function removeItem(index) {
 <script>
 $(document).ready(function() {
 
+    $(document).on('click', '#completeSale', function() {
+        $.ajax({
+            type: "Post",
+            url: "",
+            data: {
+                cart: cart,
+                total: total,
+                amount_paid: parseFloat($("#amountPaid").val());
+                _token: $('meta[name="csrf-token"]').attr('content');
+            },
+            success: function(res) {
+                toastr.success("Success, Sale Complete");
+                cart = [];
+                renderCart();
+                $("#amountPaid").val();
+            },
+            error: function(xhr) {
+                alert(xhr.responseJSON.message);
+            }
+        });
+    });
+
     $(document).on('click', '#getInfoProduct', function() {
         var product_id = $(this).val();
         $("#productInfoModal").modal('show');

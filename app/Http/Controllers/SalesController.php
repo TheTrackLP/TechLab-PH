@@ -24,4 +24,8 @@ class SalesController extends Controller
             'data'=>$product,
         ]);
     }
+
+    public function SaleCompleted(Request $request){
+        
+    }
 }
