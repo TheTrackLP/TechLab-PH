@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SupplierController;
 use App\Models\Categories;
@@ -56,6 +57,10 @@ Route::middleware('auth')->group(function(){
         Route::get('/admin/sales', 'SalesIndex')->name('sales.index');
         Route::get('/admin/product/info/{id}', 'getProductData');
         Route::post('/admin/sales/store', 'SaleCompleted')->name('sales.store');
+    });
+
+    Route::controller(ReportsController::class)->group(function(){
+        Route::get('/admin/reports', 'ReportsIndex')->name('reports.index'); 
     });
 });
 

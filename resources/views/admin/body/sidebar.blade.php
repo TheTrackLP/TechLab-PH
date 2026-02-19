@@ -68,7 +68,8 @@
                 </a>
                 <!-- REPORTS -->
                 <div class="sb-sidenav-menu-heading">Reports</div>
-                <a class="nav-link button-hover" href="#">
+                <a class="nav-link button-hover {{ request()->routeIs('reports.*') ? 'active' : '' }}"
+                    href="{{ route('reports.index') }}">
                     <div class="sb-nav-link-icon">
                         <i class="fas fa-chart-line"></i>
                     </div>
