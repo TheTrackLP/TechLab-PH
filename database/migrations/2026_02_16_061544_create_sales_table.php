@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
             $table->string('invoice_no')->nullable();
-            $table->string('customer_name');
+            $table->string('customer_name')->nullable();
             $table->float('total_amount');
             $table->float('total_profit');
             $table->string('payment_type');

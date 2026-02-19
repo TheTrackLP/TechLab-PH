@@ -179,6 +179,7 @@
 <script>
 let cart = [];
 let total = 0;
+let change = 0;
 
 $(document).on('click', '.addToCart', function() {
     let id = $(this).data("id");
@@ -247,7 +248,7 @@ function calculateChange() {
 
     let paid = parseFloat($("#amountPaid").val()) || 0;
 
-    let change = paid - total;
+    change = paid - total;
 
     if (change < 0) {
         $("#changeDisplay")
@@ -273,7 +274,6 @@ function calculateChange() {
 }
 $(document).on("input", "#amountPaid", function() {
     calculateChange();
-
 });
 
 
@@ -296,29 +296,36 @@ function removeItem(index) {
 </script>
 
 <script>
-$(document).ready(function() {
-
-    $(document).on('click', '#completeSale', function() {
-        $.ajax({
-            type: "Post",
-            url: "",
-            data: {
-                cart: cart,
-                total: total,
-                amount_paid: parseFloat($("#amountPaid").val());
-                _token: $('meta[name="csrf-token"]').attr('content');
-            },
-            success: function(res) {
-                toastr.success("Success, Sale Complete");
-                cart = [];
-                renderCart();
-                $("#amountPaid").val();
-            },
-            error: function(xhr) {
-                alert(xhr.responseJSON.message);
-            }
-        });
+$(document).on('click', '#completeSale', function() {
+    $.ajax({
+        type: "Post",
+        url: "/admin/sales/store",
+        data: {
+            cart: cart,
+            change: change,
+            amount_paid: parseFloat($("#amountPaid").val()) || 0,
+            _token: $('meta[name="csrf-token"]').attr('content'),
+        },
+        success: function(res) {
+            Swal.fire({
+                title: "Sale Complete",
+                text: "Invoice is " + res.invoice_no,
+                icon: "success",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    location.reload();
+                }
+            });
+            cart = [];
+            renderCart();
+        },
+        error: function(xhr) {
+            alert(xhr.responseJSON.message);
+        }
     });
+});
+
+$(document).ready(function() {
 
     $(document).on('click', '#getInfoProduct', function() {
         var product_id = $(this).val();
