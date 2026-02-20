@@ -51,4 +51,42 @@ class ReportsController extends Controller
             'all_sales',
             'product_sale'));
     }
+
+    public function ViewInvoice($id){
+        $invoice = Sales::findOrFail($id);
+
+        $items = salesItem::select(
+            "sales_items.*",
+            "sales.*",
+            "products.name",
+        )
+        ->join('sales', 'sales.id', '=', 'sales_items.sale_id')
+        ->join('products', 'products.id', '=', 'sales_items.product_id')
+        ->where('sales_items.sale_id', $invoice->id)
+        ->get();
+        return response()->json([
+            'invoice'=>$invoice,
+            'items'=>$items,
+        ]);
+    }
+
+    // public function PrintInvoice(Request $request){
+    //     $invoice_id = $request->id;
+    //     $invoice = Sales::findOrFail($invoice_id)->first();
+
+    //     $items = salesItem::select(
+    //         "sales_items.*",
+    //         "sales.*",
+    //         "products.name",
+    //     )
+    //     ->join('sales', 'sales.id', '=', 'sales_items.sale_id')
+    //     ->join('products', 'products.id', '=', 'sales_items.product_id')
+    //     ->where('sales_items.sale_id', $invoice->id)
+    //     ->get();
+
+    //     return view('backend.print_invoice', compact(
+    //         'invoice',
+    //         'items'
+    //     ));
+    // }
 }

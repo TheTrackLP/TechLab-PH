@@ -80,6 +80,7 @@ $date_table = 1;
                             <th class="text-center">Total</th>
                             <th class="text-center">Profit</th>
                             <th class="text-center">Payment</th>
+                            <th class="text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -91,6 +92,10 @@ $date_table = 1;
                             <td class="text-end">₱ {{ number_format($sale->total_amount, 2) }}</td>
                             <td class="text-end text-success">₱ {{ number_format($sale->total_profit, 2) }}</td>
                             <td class="text-center"><span class="badge bg-primary">{{ $sale->payment_type }}</span></td>
+                            <td class="text-center align-middle">
+                                <button type="button" class="btn btn-info text-white" id="openInvoiceModal"
+                                    value="{{ $sale->id }}"><i class="fa-solid fa-eye"></i></button>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -174,8 +179,143 @@ $date_table = 1;
     </div>
 </div>
 
+<!-- Invoice Preview Modal -->
+<div class="modal fade" id="invoicePreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-receipt me-2"></i>
+                    Invoice Preview
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <h2 class="fw-bold mb-0">TechLab PH</h2>
+                        <small>Computer Services Center</small><br>
+                        <small>Manila, Philippines</small>
+                    </div>
+                    <div class="col-md-6 text-md-end mb-3">
+                        <h2 class="fw-bold">Invoice</h2>
+                        <p class="mb-1"><strong>Invoice No:</strong> <span id="invoice_no"></span></p>
+                        <p class="mb-1"><strong>Date:</strong> <span id="invoice_date"></span></p>
+                        <p class="mb-0"><strong>Status:</strong>
+                            <span class="badge bg-success" id="invoice_status"></span>
+                        </p>
+                    </div>
+                </div>
+                <hr>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <strong>Customer:</strong> Walk-in Customer
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light text-center">
+                            <tr>
+                                <th>#</th>
+                                <th class="text-start">Product</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsProductBody">
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-md-6"></div>
+                    <div class="col-md-6">
+                        <table class="table table-sm">
+                            <tr>
+                                <th>Total:</th>
+                                <td class="text-end fw-bold">₱<span id="invoice_total"></span></td>
+                            </tr>
+                            <tr>
+                                <th>Amount Paid:</th>
+                                <td class="text-end">₱<span id="invoice_paid"></span></td>
+                            </tr>
+                            <tr>
+                                <th>Change:</th>
+                                <td class="text-end">₱<span id="invoice_change"></span></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <small class="text-muted">Thank you for your business!</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-danger px-5" data-bs-dismiss="modal">
+                    Close
+                </button>
+                <button class="btn btn-success px-5" onclick="PrintInvoice()">
+                    Print
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <script>
 $(document).ready(function() {
+    function PrintInvoice(id) {
+        // const url = `?id=${id}`;
+        // window.open(url, '_blank');
+    }
+    $(document).on('click', '#openInvoiceModal', function() {
+        var invoice_id = $(this).val();
+        $("#invoicePreviewModal").modal('show');
+        let tbody = $("#itemsProductBody");
+        tbody.empty();
+        $.ajax({
+            type: "GET",
+            url: "/admin/reports/view-invoice/" + invoice_id,
+            success: function(res) {
+                console.log(res);
+
+                $("#invoice_no").text(res.invoice.invoice_no);
+                let rawDate = res.invoice.completed_at;
+                // Convert to valid Date object
+                let formattedDate = new Date(rawDate.replace(' ', 'T'));
+
+                let format_date = formattedDate.toLocaleString('en-PH', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                });
+                $("#invoice_date").text(format_date);
+                $("#invoice_status").text(res.invoice.status);
+                $("#invoice_total").text(res.invoice.total_amount.toLocaleString('en-PH'));
+                $("#invoice_paid").text(res.invoice.amount_paid.toLocaleString('en-PH'));
+                $("#invoice_change").text(res.invoice.change_amount.toLocaleString(
+                    'en-PH'));
+                $.each(res.items, function(key, item) {
+                    tbody.append(`
+                     <tr class="text-center">
+                        <td>${key + 1}</td>
+                        <td class="text-start fw-semibold">${item.name}</td>
+                        <td>${item.quantity}</td>
+                        <td>₱${item.selling_price_snapshot.toLocaleString('en-PH')}</td>
+                        <td class="fw-semibold">₱${item.subtotal.toLocaleString('en-PH')}</td>
+                    </tr>
+                    `)
+                });
+                PrintInvoice(res.invoice.id);
+            }
+        })
+    });
+
     var dateRange = $("#dataRangeTable").DataTable({
         ordering: false,
         searching: true,
@@ -186,16 +326,15 @@ $(document).ready(function() {
             return true;
         }
 
-        var SelectedfromDate = $(".fromDate").val() || "";
-        var SelectedtoDate = $(".toDate").val() || "";
-        var theDate = data[2] || "";
-        console.log(SelectedfromDate.substr(0, 7));
-        console.log(SelectedtoDate.substr(0, 7));
-
+        var SelectedfromDate = $(".fromDate").val().substr(0, 7) || "";
+        var SelectedtoDate = $(".toDate").val().substr(0, 7) || "";
+        var theDate = data[2].substr(0, 7) || "";
 
         if (
-            (SelectedfromDate.substr(0, 7) === "" || theDate.includes(SelectedfromDate.substr(0, 7))) ||
-            (SelectedtoDate.substr(0, 7) === "" || theDate.includes(SelectedtoDate.substr(0, 7)))
+            (SelectedfromDate === "" && SelectedtoDate === "") ||
+            (SelectedfromDate === "" && date <= SelectedtoDate) ||
+            (SelectedfromDate <= theDate && SelectedtoDate === "") ||
+            (SelectedfromDate <= theDate && theDate <= SelectedtoDate)
         ) {
             return true;
         }
