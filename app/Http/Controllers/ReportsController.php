@@ -89,4 +89,17 @@ class ReportsController extends Controller
     //         'items'
     //     ));
     // }
+
+    public function GenerateDateRangeReport(Request $request){
+        $fromDate = $request->fromDate;
+        $toDate = $request->toDate;
+
+        $dateFilter = Sales::whereBetween('completed_at', [$fromDate, $toDate])
+                             ->get();
+        return view('backend.print_daterange', compact(
+            'dateFilter',
+            'fromDate',
+            'toDate'
+            ));
+    }
 }

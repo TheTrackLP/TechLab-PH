@@ -8,6 +8,48 @@ $date_table = 1;
 @endphp
 <div class="container-fluid px-4">
     <h1 class="mt-4 mb-4">Reports Module</h1>
+    <hr>
+    <div class="card shadow-sm mb-5">
+        <div class="card-body">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Sales Reports Filter</h5>
+                <small class="text-muted">Applies to Invoice & Product Sales Reports</small>
+            </div>
+
+            <div class="row g-3 align-items-end">
+
+                <div class="col-md-3">
+                    <label class="form-label">From Date</label>
+                    <input type="date" class="form-control">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">To Date</label>
+                    <input type="date" class="form-control">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label d-block invisible">Actions</label>
+                    <div class="d-flex gap-2">
+
+                        <button class="btn btn-outline-dark w-100">
+                            <i class="fa-solid fa-file-invoice me-1"></i>
+                            Invoice Report
+                        </button>
+
+                        <button class="btn btn-dark w-100">
+                            <i class="fa-solid fa-chart-column me-1"></i>
+                            Product Sales
+                        </button>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
     <!-- DAILY SUMMARY -->
     <h5 class="mb-3">Daily Summary</h5>
     <div class="row g-4 mb-5">
@@ -36,39 +78,10 @@ $date_table = 1;
             </div>
         </div>
     </div>
-    <!--  DATE RANGE REPORT -->
+    <!--  INVOICE REPORT -->
     <h5 class="mb-3">Date Range Report</h5>
     <div class="card shadow-sm mb-5">
         <div class="card-body">
-            <!-- Date Filter -->
-            <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <label class="form-label">From Date</label>
-                    <input type="date" name="fromDate" id="fromDate" class="form-control fromDate">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">To Date</label>
-                    <input type="date" name="toDate" id="toDate" class="form-control toDate">
-                </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button class="btn btn-dark w-100" id="generateDate">
-                        Generate Report
-                    </button>
-                </div>
-            </div>
-            <!-- Date Range Summary -->
-            <div class="row g-4 mb-4">
-                <div class="col-md-6">
-                    <div class="bg-light p-3 rounded border">
-                        <strong>Total Revenue:</strong> ₱ 120,500.00
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="bg-light p-3 rounded border">
-                        <strong>Total Profit:</strong> ₱ 32,100.00
-                    </div>
-                </div>
-            </div>
             <!-- Table -->
             <div class="table-responsive">
                 <table class="table table-bordered table-hover align-middle" id="dataRangeTable">
@@ -91,7 +104,8 @@ $date_table = 1;
                             <td class="text-center">{{ date('Y-m-d', strtotime($sale->completed_at)) }}</td>
                             <td class="text-end">₱ {{ number_format($sale->total_amount, 2) }}</td>
                             <td class="text-end text-success">₱ {{ number_format($sale->total_profit, 2) }}</td>
-                            <td class="text-center"><span class="badge bg-primary">{{ $sale->payment_type }}</span></td>
+                            <td class="text-center"><span class="badge bg-primary">{{ $sale->payment_type }}</span>
+                            </td>
                             <td class="text-center align-middle">
                                 <button type="button" class="btn btn-info text-white" id="openInvoiceModal"
                                     value="{{ $sale->id }}"><i class="fa-solid fa-eye"></i></button>
@@ -265,11 +279,23 @@ $date_table = 1;
 </div>
 
 <script>
+function GenerateDateRange() {
+    const fromDate = document.getElementById('fromDate').value;
+    const toDate = document.getElementById('toDate').value;
+    if (!fromDate || !toDate) {
+        toastr.error("Error, Both Date are empty!");
+        return;
+    }
+    const url = `{{ route('generate.date') }}?fromDate=${fromDate}&toDate=${toDate}`
+    window.open(url, '_blank');
+}
 $(document).ready(function() {
     function PrintInvoice(id) {
         // const url = `?id=${id}`;
         // window.open(url, '_blank');
     }
+
+
     $(document).on('click', '#openInvoiceModal', function() {
         var invoice_id = $(this).val();
         $("#invoicePreviewModal").modal('show');
@@ -296,8 +322,10 @@ $(document).ready(function() {
                 });
                 $("#invoice_date").text(format_date);
                 $("#invoice_status").text(res.invoice.status);
-                $("#invoice_total").text(res.invoice.total_amount.toLocaleString('en-PH'));
-                $("#invoice_paid").text(res.invoice.amount_paid.toLocaleString('en-PH'));
+                $("#invoice_total").text(res.invoice.total_amount.toLocaleString(
+                    'en-PH'));
+                $("#invoice_paid").text(res.invoice.amount_paid.toLocaleString(
+                    'en-PH'));
                 $("#invoice_change").text(res.invoice.change_amount.toLocaleString(
                     'en-PH'));
                 $.each(res.items, function(key, item) {
