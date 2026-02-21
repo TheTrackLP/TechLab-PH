@@ -11,43 +11,33 @@ $date_table = 1;
     <hr>
     <div class="card shadow-sm mb-5">
         <div class="card-body">
-
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="mb-0">Sales Reports Filter</h5>
                 <small class="text-muted">Applies to Invoice & Product Sales Reports</small>
             </div>
-
             <div class="row g-3 align-items-end">
-
                 <div class="col-md-3">
                     <label class="form-label">From Date</label>
-                    <input type="date" class="form-control">
+                    <input type="date" name="fromDate" id="fromDate" class="form-control">
                 </div>
-
                 <div class="col-md-3">
                     <label class="form-label">To Date</label>
-                    <input type="date" class="form-control">
+                    <input type="date" name="toDate" id="toDate" class="form-control">
                 </div>
-
                 <div class="col-md-6">
                     <label class="form-label d-block invisible">Actions</label>
                     <div class="d-flex gap-2">
-
-                        <button class="btn btn-outline-dark w-100">
+                        <button class="btn btn-outline-dark w-100" onclick="GenerateDateRangeInvoice()">
                             <i class="fa-solid fa-file-invoice me-1"></i>
                             Invoice Report
                         </button>
-
-                        <button class="btn btn-dark w-100">
+                        <button class="btn btn-dark w-100" onclick="GenerateDateRangeProductSale()">
                             <i class="fa-solid fa-chart-column me-1"></i>
                             Product Sales
                         </button>
-
                     </div>
                 </div>
-
             </div>
-
         </div>
     </div>
     <!-- DAILY SUMMARY -->
@@ -101,7 +91,7 @@ $date_table = 1;
                         <tr>
                             <td class="text-center">{{ $date_table++ }}</td>
                             <td>{{ $sale->invoice_no }}</td>
-                            <td class="text-center">{{ date('Y-m-d', strtotime($sale->completed_at)) }}</td>
+                            <td class="text-center">{{ date('M d, Y', strtotime($sale->completed_at)) }}</td>
                             <td class="text-end">₱ {{ number_format($sale->total_amount, 2) }}</td>
                             <td class="text-end text-success">₱ {{ number_format($sale->total_profit, 2) }}</td>
                             <td class="text-center"><span class="badge bg-primary">{{ $sale->payment_type }}</span>
@@ -151,6 +141,12 @@ $date_table = 1;
     <h5 class="mb-3">Low Stock Report</h5>
     <div class="card shadow-sm">
         <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Low Stock Report</h5>
+                <a class="btn btn-sm btn-outline-dark px-5" href="{{ route('generate.lowStocks') }}">
+                    <i class="fa-solid fa-print me-1"></i> Print
+                </a>
+            </div>
             <div class="table-responsive">
                 <table class="table table-bordered table-hover align-middle Datables">
                     <thead class="table-dark text-center">
@@ -279,15 +275,33 @@ $date_table = 1;
 </div>
 
 <script>
-function GenerateDateRange() {
+function GenerateDateRangeInvoice() {
     const fromDate = document.getElementById('fromDate').value;
     const toDate = document.getElementById('toDate').value;
     if (!fromDate || !toDate) {
         toastr.error("Error, Both Date are empty!");
         return;
     }
-    const url = `{{ route('generate.date') }}?fromDate=${fromDate}&toDate=${toDate}`
-    window.open(url, '_blank');
+    const url = `{{ route('dateRange.invoice') }}?fromDate=${fromDate}&toDate=${toDate}`;
+    printNewWindow(url);
+}
+
+function GenerateDateRangeProductSale() {
+    const fromDate = document.getElementById('fromDate').value;
+    const toDate = document.getElementById('toDate').value;
+    if (!fromDate || !toDate) {
+        toastr.error("Error, Both Date are empty!");
+        return;
+    }
+    const url = `{{ route('dateRange.productSale') }}?fromDate=${fromDate}&toDate=${toDate}`;
+    printNewWindow(url);
+}
+
+function printNewWindow(url) {
+    const printWindow = window.open(url, '_blank');
+    printWindow.addEventListener('load', function() {
+        printWindow.print();
+    }, true);
 }
 $(document).ready(function() {
     function PrintInvoice(id) {
@@ -343,41 +357,37 @@ $(document).ready(function() {
             }
         })
     });
+    $("#dataRangeTable").DataTable();
+    // This is Date Filter in the DataTables (This is comment for Educational for the future)
+    // $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+    //     if (
+    //         settings.nTable.id !== "dataRangeTable") {
+    //         return true;
+    //     }
 
-    var dateRange = $("#dataRangeTable").DataTable({
-        ordering: false,
-        searching: true,
-    });
-    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-        if (
-            settings.nTable.id !== "dataRangeTable") {
-            return true;
-        }
+    //     var SelectedfromDate = $(".fromDate").val().substr(0, 7) || "";
+    //     var SelectedtoDate = $(".toDate").val().substr(0, 7) || "";
+    //     var theDate = data[2].substr(0, 7) || "";
 
-        var SelectedfromDate = $(".fromDate").val().substr(0, 7) || "";
-        var SelectedtoDate = $(".toDate").val().substr(0, 7) || "";
-        var theDate = data[2].substr(0, 7) || "";
-
-        if (
-            (SelectedfromDate === "" && SelectedtoDate === "") ||
-            (SelectedfromDate === "" && date <= SelectedtoDate) ||
-            (SelectedfromDate <= theDate && SelectedtoDate === "") ||
-            (SelectedfromDate <= theDate && theDate <= SelectedtoDate)
-        ) {
-            return true;
-        }
-        return false;
-    });
-    $(".fromDate, .toDate").on("change", function() {
-        dateRange.draw();
-    });
+    //     if (
+    //         (SelectedfromDate === "" && SelectedtoDate === "") ||
+    //         (SelectedfromDate === "" && date <= SelectedtoDate) ||
+    //         (SelectedfromDate <= theDate && SelectedtoDate === "") ||
+    //         (SelectedfromDate <= theDate && theDate <= SelectedtoDate)
+    //     ) {
+    //         return true;
+    //     }
+    //     return false;
+    // });
+    // $(".fromDate, .toDate").on("change", function() {
+    //     dateRange.draw();
+    // });
 
 });
 
 // $(document).on('click', "#generateDate", function() {
 //     var fromDate = $("#fromDate").val();
 //     var toDate = $("#toDate").val();
-
 // });
 </script>
 @endsection

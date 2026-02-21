@@ -24,6 +24,11 @@ $curr_date = date('F j, Y');
         .no-print {
             display: none !important;
         }
+
+        body {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
     }
     </style>
 </head>
@@ -43,12 +48,12 @@ $curr_date = date('F j, Y');
         <div class="row mb-4">
             <div class="col-md-6">
                 <div class="border rounded p-3">
-                    <strong>Total Revenue:</strong> ₱{{ number_format($dateFilter->sum('total_amount'),2 ) }}
+                    <strong>Total Revenue:</strong> ₱{{ number_format($dateFilter_invoice->sum('total_amount'),2 ) }}
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="border rounded p-3">
-                    <strong>Total Profit:</strong> ₱{{ number_format($dateFilter->sum('total_profit'), 2) }}
+                    <strong>Total Profit:</strong> ₱{{ number_format($dateFilter_invoice->sum('total_profit'), 2) }}
                 </div>
             </div>
         </div>
@@ -65,9 +70,9 @@ $curr_date = date('F j, Y');
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($dateFilter as $date)
+                    @foreach ($dateFilter_invoice as $date)
                     <tr>
-                        <td class="align-middle">{{ $i++ }}</td>
+                        <td class="text-center align-middle">{{ $i++ }}</td>
                         <td class="align-middle">{{ $date->invoice_no }}</td>
                         <td class="text-center align-middle">{{ date('F j, Y', strtotime($date->completed_at)) }}</td>
                         <td class="text-end align-middle">₱{{ number_format($date->total_amount, 2) }}</td>

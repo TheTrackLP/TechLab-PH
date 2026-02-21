@@ -63,7 +63,9 @@ Route::middleware('auth')->group(function(){
         Route::get('/admin/reports', 'ReportsIndex')->name('reports.index'); 
         Route::get('/admin/reports/view-invoice/{id}', 'ViewInvoice'); 
         // Route::get('/admin/reports/print-invoice', 'PrintInvoice')->name('print.invoice'); 
-        Route::get('/admin/reports/date/', 'GenerateDateRangeReport')->name('generate.date'); 
+        Route::get('/admin/reports/print/invoice/date-range', 'GenerateDateRangeInvoice')->name('dateRange.invoice'); 
+        Route::get('/admin/reports/print/product-sale/date-range', 'GenerateDateRangeProductSale')->name('dateRange.productSale'); 
+        Route::get('/admin/reports/print/low-stocks', 'GenerateLowStocksReport')->name('generate.lowStocks'); 
     });
 });
 
