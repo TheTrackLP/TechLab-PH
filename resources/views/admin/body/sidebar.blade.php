@@ -43,6 +43,20 @@
                     </div>
                     Suppliers
                 </a>
+                <a class="nav-link button-hover {{ request()->routeIs('restock.*') ? 'active' : '' }}"
+                    href="{{ route('restock.index') }}">
+                    <div class="sb-nav-link-icon">
+                        <i class="fas fa-truck-loading"></i>
+                    </div>
+                    Restock
+                </a>
+                <a class="nav-link button-hover {{ request()->routeIs('movements.*') ? 'active' : '' }}"
+                    href="{{ route('movements.index') }}">
+                    <div class="sb-nav-link-icon">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    Stock Movements
+                </a>
                 <!-- SALES -->
                 <div class="sb-sidenav-menu-heading">Sales</div>
                 <a class="nav-link button-hover {{ request()->routeIs('sales.*') ? 'active' : '' }}"
@@ -51,12 +65,6 @@
                         <i class="fas fa-cash-register"></i>
                     </div>
                     POS
-                </a>
-                <a class="nav-link button-hover" href="#">
-                    <div class="sb-nav-link-icon">
-                        <i class="fas fa-receipt"></i>
-                    </div>
-                    Transactions
                 </a>
                 <!-- SERVICES -->
                 <div class="sb-sidenav-menu-heading">Services</div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Products;
 use App\Models\Sales;
 use App\Models\salesItem;
+use App\Models\StockMovements;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -79,6 +80,15 @@ class SalesController extends Controller
 
                 $totalAmount += $subtotal;
                 $totalProfit += $profit;
+
+                StockMovements::create([
+                    'product_id' => $product->id,
+                    'type' => 'sale',
+                    'quantity' => -$item['quantity'],
+                    'reference_id' => $sale->id,
+                    'notes' => null,
+                    'created_by' => null,
+                ]);
             }
 
             //Generate Invoice

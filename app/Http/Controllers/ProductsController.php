@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Categories;
 use App\Models\Products;
 use App\Models\Supplier;
+use App\Models\StockMovements;
 use Illuminate\Http\Request;
 use Validator;
 
@@ -54,7 +55,7 @@ class ProductsController extends Controller
             $path = 'assets/img/products/'.$filename;
         }
 
-        Products::create([
+        $product = Products::create([
             "name" => $request->name,
             "image" => $path,
             "brand" => $request->brand,
@@ -66,6 +67,15 @@ class ProductsController extends Controller
             "minimum_stock" => $request->minimum_stock,
             "cost_price" => $request->cost_price,
             "selling_price" => $request->selling_price,
+        ]);
+
+        StockMovements::create([
+            'product_id' => $product->id,
+            'type' => 'restock',
+            'quantity' => $request->stock_quantity,
+            'reference_id' => null,
+            'notes' => null,
+            'created_by' => null,
         ]);
 
         return redirect()->route('products.index')

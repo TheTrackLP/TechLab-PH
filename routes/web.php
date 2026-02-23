@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\StocksController;
 use App\Http\Controllers\SupplierController;
 use App\Models\Categories;
 use Illuminate\Support\Facades\Route;
@@ -66,6 +67,14 @@ Route::middleware('auth')->group(function(){
         Route::get('/admin/reports/print/invoice/date-range', 'GenerateDateRangeInvoice')->name('dateRange.invoice'); 
         Route::get('/admin/reports/print/product-sale/date-range', 'GenerateDateRangeProductSale')->name('dateRange.productSale'); 
         Route::get('/admin/reports/print/low-stocks', 'GenerateLowStocksReport')->name('generate.lowStocks'); 
+    });
+
+    Route::controller(StocksController::class)->group(function(){
+        Route::get('/admin/stock-management/restock', 'RestockIndex')->name('restock.index');
+        Route::get('/admin/stock-management/movements', 'StockMovementsIndex')->name('movements.index');
+        Route::get('/admin/product/getData/{id}', 'GetProductData');
+        Route::post('/admin/product/restocks/save', 'RestockCompleted')->name('sales.store');
+    
     });
 });
 

@@ -89,6 +89,12 @@ p {
     @endif
 
     $(document).ready(function() {
+        $(".select2").select2({
+            width: "100%",
+            theme: 'bootstrap-5',
+            placeholder: "Select an option",
+        });
+
         $(".modalSelect2").each(function() {
             var $this = $(this);
             $this.select2({
