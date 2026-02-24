@@ -74,7 +74,8 @@ Route::middleware('auth')->group(function(){
         Route::get('/admin/stock-management/movements', 'StockMovementsIndex')->name('movements.index');
         Route::get('/admin/product/getData/{id}', 'GetProductData');
         Route::post('/admin/product/restocks/save', 'RestockCompleted')->name('sales.store');
-    
+        
+        Route::get('/admin/stock-management/print', 'GenerateDateRangeStockMovements')->name('dateRange.stockMovements');
     });
 });
 

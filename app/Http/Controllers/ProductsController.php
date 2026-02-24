@@ -17,10 +17,8 @@ class ProductsController extends Controller
         $products = Products::select(
             "products.*",
                      "categories.category_name",
-                     "Suppliers.name as supplier_name"
             )
             ->join("categories", "categories.id", "=", "products.category_id")
-            ->join("Suppliers", "Suppliers.id", "=", "products.supplier_id")
             ->get();
         return view('backend.product.products', compact('categories', 'products', 'suppliers'));
     }

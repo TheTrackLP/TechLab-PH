@@ -28,11 +28,6 @@ class StocksController extends Controller
         ]);
     }
 
-    public function StockMovementsIndex(){
-        $restocks = Restocks::all();
-        return view('backend.stock_movements', compact('restocks'));
-    }
-
     public function RestockCompleted(Request $request){
         DB::beginTransaction();
         try {
@@ -117,5 +112,71 @@ class StocksController extends Controller
                 'message' => $e->getMessage()
                 ], 400);
             }
+    }
+
+    public function StockMovementsIndex(){
+        $stockMove = StockMovements::select(
+            'stock_movements.*',
+            'products.name',
+            DB::raw("CASE 
+                                WHEN stock_movements.type = 'sale' THEN sales.invoice_no 
+                                WHEN stock_movements.type = 'restock' THEN restocks.reference_no 
+                                ELSE 'Invalid' 
+                            END AS reference_no")
+        )
+        ->leftJoin('products', 'products.id', '=', 'stock_movements.product_id')
+        ->leftJoin('sales', 'sales.id', '=', 'stock_movements.reference_id')
+        ->leftJoin('restocks', 'restocks.id', '=', 'stock_movements.reference_id')
+        ->get();
+        return view('backend.stock_movements', compact('stockMove'));
+    }
+
+    public function GenerateDateRangeStockMovements(Request $request){
+        $fromDate = $request->fromDate;
+        $toDate = $request->toDate;
+        $type = $request->type;
+
+
+        $query = StockMovements::select(
+            'stock_movements.*',
+            'products.name',
+            'products.sku',
+            DB::raw("CASE 
+                                WHEN stock_movements.type = 'sale' THEN sales.invoice_no 
+                                WHEN stock_movements.type = 'restock' THEN restocks.reference_no 
+                                ELSE 'N/A' 
+                            END AS reference_no")
+        )
+        ->leftJoin('products', 'products.id', '=', 'stock_movements.product_id')
+        ->leftJoin('sales', 'sales.id', '=', 'stock_movements.reference_id')
+        ->leftJoin('restocks', 'restocks.id', '=', 'stock_movements.reference_id');
+
+        if ($fromDate && $toDate) {
+            $query->whereBetween('stock_movements.created_at', [
+                $fromDate . ' 00:00:00',
+                $toDate . ' 23:59:59'
+            ]);
+        }
+        
+        $StockMovements = $query->orderBy('stock_movements.created_at', 'desc')
+                                ->where('stock_movements.type', $type)
+                                ->get();
+        $totalSale = $StockMovements->where('type', 'sale')->count();
+        $totalRestock = $StockMovements->where('type', 'restock')->count();
+        $totalAdjustment = $StockMovements->where('type', 'adjustment')->count();
+        $totalReturn = $StockMovements->where('type', 'return')->count();
+        
+        $netMovement = $StockMovements->sum('quantity');        
+        return view('backend.print.print_daterange_stockmovements', compact(
+            'StockMovements',
+            'fromDate',
+            'toDate',
+            'type',
+            'totalSale',
+            'totalRestock',
+            'totalAdjustment',
+            'totalReturn',
+            'netMovement',
+            ));
     }
 }

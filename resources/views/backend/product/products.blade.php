@@ -23,7 +23,6 @@ $i = 1;
                                 <th class="text-center">Image</th>
                                 <th class="text-center">Product</th>
                                 <th class="text-center">Category</th>
-                                <th class="text-center">Supplier</th>
                                 <th class="text-center">Stock</th>
                                 <th class="text-center">Selling Price</th>
                                 <th class="text-center">Status</th>
@@ -43,7 +42,6 @@ $i = 1;
                                     <strong>{{ $prod_data->name  }}</strong><br>
                                 </td>
                                 <td class="text-center">{{ $prod_data->category_name }}</td>
-                                <td class="text-center">{{ $prod_data->supplier_name }}</td>
                                 <td class="text-center">
                                     @if($prod_data->minimum_stock > $prod_data->stock_quantity)
                                     <span class="badge text-bg-danger">{{ $prod_data->stock_quantity }}</span>
