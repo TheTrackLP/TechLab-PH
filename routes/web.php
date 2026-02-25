@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RepairController;
 use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\StocksController;
@@ -76,6 +77,12 @@ Route::middleware('auth')->group(function(){
         Route::post('/admin/product/restocks/save', 'RestockCompleted')->name('sales.store');
         
         Route::get('/admin/stock-management/print', 'GenerateDateRangeStockMovements')->name('dateRange.stockMovements');
+    });
+
+    Route::controller(RepairController::class)->group(function(){
+        Route::get('/admin/repairs', 'RepairIndex')->name('repair.index');
+        Route::post('/admin/repairs/generate-repair', 'GenerateRepairForm')->name('generate.repair');
+        Route::get('/admin/repairs/view/{id}', 'getRepairDetails');
     });
 });
 

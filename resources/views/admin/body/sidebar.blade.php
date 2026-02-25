@@ -68,7 +68,8 @@
                 </a>
                 <!-- SERVICES -->
                 <div class="sb-sidenav-menu-heading">Services</div>
-                <a class="nav-link button-hover" href="#">
+                <a class="nav-link button-hover {{ request()->routeIs('repair.*') ? 'active' : '' }}"
+                    href="{{ route('repair.index') }}">
                     <div class="sb-nav-link-icon">
                         <i class="fas fa-tools"></i>
                     </div>
