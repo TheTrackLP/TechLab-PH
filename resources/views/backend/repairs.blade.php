@@ -221,24 +221,6 @@ $i = 1;
                         tabindex="0">
                         <div class="card">
                             <div class="card-body">
-                                <div class="alert alert-secondary border mb-4">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <strong>Repair No:</strong>
-                                            <span class="text-primary fw-bold repair_no"></span>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <strong>Customer:</strong>
-                                            Juan Dela Cruz
-                                        </div>
-                                        <div class="col-md-4">
-                                            <strong>Device:</strong>
-                                            System Unit
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Diagnosis -->
                                 <div class="mb-3">
                                     <label class="form-label">Diagnosis</label>
                                     <textarea class="form-control" rows="3"></textarea>
@@ -261,27 +243,48 @@ $i = 1;
                                 <h6 class="mb-3">Add Parts</h6>
 
                                 <div class="row g-3 align-items-end mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Product</label>
-                                        <select class="form-select">
-                                            <option>Select Product</option>
-                                            <option>PSU 650W</option>
-                                            <option>Motherboard B450</option>
+
+                                    <!-- Category -->
+                                    <div class="col-md-3">
+                                        <label class="form-label">Category</label>
+                                        <select class="form-select modalSelect2">
+                                            <option>Select Category</option>
+                                            <option>Power Supply</option>
+                                            <option>Motherboard</option>
+                                            <option>RAM</option>
+                                            <option>Storage</option>
                                         </select>
                                     </div>
+
+                                    <!-- Product -->
+                                    <div class="col-md-3">
+                                        <label class="form-label">Product</label>
+                                        <select class="form-select modalSelect2">
+                                            <option>Select Product</option>
+                                            <option>PSU 650W Bronze</option>
+                                            <option>PSU 750W Gold</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Quantity -->
                                     <div class="col-md-2">
                                         <label class="form-label">Qty</label>
-                                        <input type="number" class="form-control">
+                                        <input type="number" class="form-control" min="1">
                                     </div>
+
+                                    <!-- Unit Price -->
                                     <div class="col-md-2">
                                         <label class="form-label">Unit Price</label>
                                         <input type="text" class="form-control" readonly>
                                     </div>
-                                    <div class="col-md-2">
-                                        <button class="btn btn-dark w-100">
+
+                                    <!-- Add Button -->
+                                    <div class="col-md-2 d-grid">
+                                        <button class="btn btn-dark">
                                             <i class="fa-solid fa-plus me-1"></i> Add
                                         </button>
                                     </div>
+
                                 </div>
 
                                 <!-- Parts Table -->

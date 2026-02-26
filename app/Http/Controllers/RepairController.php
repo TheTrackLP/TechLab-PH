@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Categories;
+use App\Models\Products;
 use App\Models\Repairs;
 use Illuminate\Http\Request;
 use Validator;
@@ -9,8 +11,14 @@ use Validator;
 class RepairController extends Controller
 {
     public function RepairIndex(){
+        $categories = Categories::all();
+        $products = Products::all();
         $repairs = Repairs::all();
-        return view('backend.repairs', compact('repairs'));
+        return view('backend.repairs', compact(
+            'repairs',
+            'products',
+            'categories'
+            ));
     }
 
     public function GenerateRepairForm(Request $request){
