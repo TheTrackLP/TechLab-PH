@@ -83,6 +83,8 @@ Route::middleware('auth')->group(function(){
         Route::get('/admin/repairs', 'RepairIndex')->name('repair.index');
         Route::post('/admin/repairs/generate-repair', 'GenerateRepairForm')->name('generate.repair');
         Route::get('/admin/repairs/view/{id}', 'getRepairDetails');
+        Route::post('/admin/repairs/update', 'RepairUpdate')->name('repair.update');
+        Route::get('/admin/products/category/{id}', 'getProductsbyCategory');
     });
 });
 

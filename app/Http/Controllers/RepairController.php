@@ -75,4 +75,27 @@ class RepairController extends Controller
             'repair'=>$repair_id,
         ]);
     }
+
+    public function RepairUpdate(Request $request){
+        $repair_id = $request->id;
+
+        Repairs::findOrFail($repair_id)->update([
+            'diagnosis' => $request->diagnosis,
+            'labor_fee' => $request->labor_fee,
+            'status' => 'awaiting_approval',
+        ]);
+
+        return redirect()->route('repair.index')->with([
+            'message' => 'Repair Updated Successfully',
+            'alert-type' => 'success',
+        ]);
+    }
+
+    public function getProductsbyCategory($id){
+        $products = Products::where('category_id', '=', $id)->get();
+
+        return response()->json([
+            'products'=>$products,
+        ]);
+    }
 }
