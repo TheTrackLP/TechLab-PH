@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Categories;
 use App\Models\Products;
+use App\Models\RepairItems;
 use App\Models\Repairs;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Validator;
 
 class RepairController extends Controller
@@ -70,25 +72,88 @@ class RepairController extends Controller
     }
 
     public function getRepairDetails($id){
-        $repair_id = Repairs::findOrFail($id);
+        $repair = Repairs::findOrFail($id);
+
+        $repairtParts = RepairItems::select(
+            'repair_items.*',
+            'repairs.*',
+            'products.name',
+        )
+        ->join('repairs', 'repairs.id', '=', 'repair_items.repair_id')
+        ->join('products', 'products.id', '=', 'repair_items.product_id')
+        ->where('repair_items.repair_id', $repair->id)
+        ->get();
+
         return response()->json([
-            'repair'=>$repair_id,
+            'repair'=>$repair,
+            'parts'=>$repairtParts,
         ]);
     }
 
     public function RepairUpdate(Request $request){
-        $repair_id = $request->id;
+        DB::beginTransaction();
+        try {
+        $repair_id = $request->repairId;
+        $repairParts = $request->repairParts;
+        $diagnosis = $request->diagnosis;
+        $labor_fee = $request->labor_fee;
+        $totalOverallPay = $request->totalOverallPay;
 
-        Repairs::findOrFail($repair_id)->update([
-            'diagnosis' => $request->diagnosis,
-            'labor_fee' => $request->labor_fee,
+        //When adding parts after diagnosis
+        $prevTotal_amount = $request->total_amount;
+
+        $repair = Repairs::findOrFail($repair_id);
+
+        $totalAmount = 0;
+
+        foreach ($repairParts as $item) {
+            $product = Products::lockForUpdate()->findOrFail($item['product_id']);
+
+            //Check Stock of Item
+            if($product->stock_quantity < $item['quantity']){
+                throw new \Exception("Insufficient stock for {$product->name}");
+            }
+
+            $subTotal = $item['selling_price'] * $item['quantity'];
+
+            RepairItems::create([
+                'repair_id' => $repair_id,
+                'product_id' => $product->id,
+                'quantity' => $item['quantity'],
+                'cost_price_snapshot' => $product->cost_price,
+                'selling_price_snapshot' => $product->selling_price,
+                'subTotal' => $subTotal,
+            ]);
+
+            $product->stock_quantity -= $item['quantity'];
+            $product->save();
+
+            $totalAmount += $subTotal;
+        }
+
+        $editListAmountTotal = $totalOverallPay + $prevTotal_amount;
+
+        $repair->update([
+            'diagnosis' => $diagnosis,
+            'labor_fee' => $labor_fee,
             'status' => 'awaiting_approval',
+            'total_parts_amount' => $totalAmount,
+            'total_amount' => $editListAmountTotal,
         ]);
 
-        return redirect()->route('repair.index')->with([
-            'message' => 'Repair Updated Successfully',
-            'alert-type' => 'success',
+        DB::commit();
+
+        return response()->json([
+            'message' => 'Restock completed successfully.',
+            'repair_no' => $repair->repair_no,
         ]);
+        
+        }catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => $e->getMessage()
+                ], 400);
+        }
     }
 
     public function getProductsbyCategory($id){
