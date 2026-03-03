@@ -198,20 +198,29 @@ $i = 1;
                                             <th>Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="repairPartsTable">
+                                    <tbody id="repairDetailsTable">
 
                                     </tbody>
                                 </table>
-                                <div class="text-end">
-                                    <p><strong>Labor Fee:</strong> <span class="labor_fee"></span></p>
-                                    <p class="fs-5"><strong>Total:</strong> <span class="overallAmount"></span></p>
+                                <div class="text-end border-top pt-3 mt-3">
+                                    <p class="mb-1">
+                                        <strong>Labor Fee:</strong>
+                                        <span class="labor_fee"></span>
+                                    </p>
+                                    <p class="mb-1">
+                                        <strong>Parts Total:</strong>
+                                        <span class="parts_amount text-dark"></span>
+                                    </p>
+                                    <hr class="my-2">
+                                    <p class="fs-5 mb-0">
+                                        <strong>Total Amount:</strong>
+                                        <span class="overallAmount fw-bold text-success"></span>
+                                    </p>
                                 </div>
                             </div>
                             <div class="card-footer">
                                 <button class="btn btn-danger" data-bs-dismiss="modal">Cancel Repair</button>
-                                <button class="btn btn-success"> <i class="fa-solid fa-check me-1"></i> Approve &
-                                    Generate Sale
-                                </button>
+                                <button class="btn btn-success">Approve Repair</button>
                             </div>
                         </div>
                     </div>
@@ -237,35 +246,50 @@ $i = 1;
                                 </div>
                                 <hr>
                                 <h6 class="mb-3">Add Parts</h6>
-                                <div class="row g-3 align-items-end mb-3">
-                                    <div class="col-md-3">
-                                        <label class="form-label">Category</label>
-                                        <select class="form-select modalSelect2" id="pickCategory">
-                                            <option></option>
-                                            @foreach ($categories as $row)
-                                            <option value="{{ $row->id }}">{{ $row->category_name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Product</label>
-                                        <select class="form-select modalSelect2" id="getProducts">
-
-                                        </select>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label">Qty</label>
-                                        <input type="number" name="quantity" id="quantity" class="form-control" min="1">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label">Unit Price</label>
-                                        <input type="text" name="unit_price" id="unit_price" class="form-control"
-                                            readonly>
-                                    </div>
-                                    <div class="col-md-2 d-grid">
-                                        <button type="button" class="btn btn-dark" id="addRepairParts">
-                                            <i class="fa-solid fa-plus me-1"></i> Add
-                                        </button>
+                                <div class="card shadow-sm border-0 mb-3">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h6 class="mb-0 fw-bold">
+                                                <i class="fa-solid fa-screwdriver-wrench me-2 text-primary"></i>
+                                                Add / Modify Parts
+                                            </h6>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                id="currentPartsPreview">
+                                                <i class="fa-solid fa-eye me-1"></i>
+                                                View Current Parts
+                                            </button>
+                                        </div>
+                                        <!-- Add New Part Row -->
+                                        <div class="row g-3 align-items-end">
+                                            <div class="col-md-3">
+                                                <label class="form-label">Category</label>
+                                                <select class="form-select modalSelect2" id="pickCategory">
+                                                    <option></option>
+                                                    @foreach ($categories as $row)
+                                                    <option value="{{ $row->id }}">
+                                                        {{ $row->category_name }}
+                                                    </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label">Product</label>
+                                                <select class="form-select modalSelect2" id="getProducts"></select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label">Qty</label>
+                                                <input type="number" id="quantity" class="form-control" min="1">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label">Unit Price</label>
+                                                <input type="text" id="unit_price" class="form-control" readonly>
+                                            </div>
+                                            <div class="col-md-2 d-grid">
+                                                <button type="button" class="btn btn-dark" id="addRepairParts">
+                                                    <i class="fa-solid fa-plus me-1"></i> Add Part
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="table-responsive">
@@ -279,24 +303,72 @@ $i = 1;
                                                 <th>Action</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="repairPartsTable">
+                                        <tbody id="repairEditTable">
 
                                         </tbody>
                                     </table>
                                 </div>
                                 <input type="hidden" name="total_amount" id="total_amount">
                                 <hr>
-                                <div class="row mt-3">
-                                    <div class="col-md-6"></div>
+                                <div class="row mt-4 g-4">
+                                    <!-- Current Saved Total -->
                                     <div class="col-md-6">
-                                        <div class="border p-3 rounded bg-light">
-                                            <div><strong>Labor Fee:</strong> <span class="labor_fee"></span></div>
-                                            <div><strong>Parts Total:</strong> <span id="partsTotal"></span></div>
-                                            <hr>
-                                            <div class="fs-5">
-                                                <strong>Total Amount:</strong>
-                                                <span class="fw-bold text-success"> <span
-                                                        id="overAllTotal"></span></span>
+                                        <div class="card border-0 shadow-sm bg-light h-100">
+                                            <div class="card-body">
+                                                <h6 class="fw-bold text-muted mb-3">
+                                                    <i class="fa-solid fa-receipt me-2 text-secondary"></i>
+                                                    Current Saved Amount
+                                                </h6>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span>Labor Fee:</span>
+                                                    <span class="fw-semibold text-dark labor_fee">
+
+                                                    </span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span>Parts Total:</span>
+                                                    <span class="fw-semibold text-dark parts_amount">
+
+                                                    </span>
+                                                </div>
+                                                <hr>
+                                                <div class="d-flex justify-content-between fs-5">
+                                                    <strong>Total Amount:</strong>
+                                                    <strong class="text-secondary overallAmount">
+
+                                                    </strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- New Estimated Total -->
+                                    <div class="col-md-6">
+                                        <div class="card border-0 shadow-sm border-start border-4 border-success h-100">
+                                            <div class="card-body">
+                                                <h6 class="fw-bold text-success mb-3">
+                                                    <i class="fa-solid fa-pen-to-square me-2"></i>
+                                                    New Estimated Amount
+                                                </h6>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span>Labor Fee:</span>
+                                                    <span class="fw-semibold" id="laborFeePreview">
+
+                                                    </span>
+                                                </div>
+
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span>Parts Total:</span>
+                                                    <span class="fw-semibold" id="partsTotalPreview">
+
+                                                    </span>
+                                                </div>
+                                                <hr>
+                                                <div class="d-flex justify-content-between fs-5">
+                                                    <strong>Total Amount:</strong>
+                                                    <strong class="text-success" id="overallTotalPreview">
+
+                                                    </strong>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -317,7 +389,6 @@ $i = 1;
 <script>
 let repairParts = [];
 let total = 0;
-let tbodyRepair;
 let totalOverallPay = 0;
 let SelectedProductId = null;
 let selectedProductName = null;
@@ -327,7 +398,7 @@ $(document).ready(function() {
         var repair_id = $(this).val();
 
         $("#viewRepairModal").modal('show');
-        tbodyRepair = $(".repairPartsTable")
+        let tbodyRepair = $("#repairDetailsTable");
         tbodyRepair.empty();
 
         $.ajax({
@@ -336,6 +407,9 @@ $(document).ready(function() {
             success: function(res) {
                 let rawDate = res.repair.created_at;
                 let formattedDate = new Date(rawDate.replace(' ', 'T'));
+                let fee = parseFloat(res.repair.labor_fee) || 0;
+                let parts = parseFloat(res.repair.total_parts_amount) || 0;
+                let overallAmount = fee + parts;
 
                 let format_date = formattedDate.toLocaleString('en-PH', {
                     year: 'numeric',
@@ -370,19 +444,15 @@ $(document).ready(function() {
                     case 'abandoned':
                         badgeColor.addClass("bg-dark");
                 }
-                //Displat Repair Details Accordion Section
-                let overallAmount = res.repair.total_amount;
-                let fee = res.repair.labor_fee;
-                $(".repair_no").text(res.repair.repair_no);
-                $("#customer_name").text(res.repair.customer_name);
-                $("#customer_number").text(res.repair.contact_number);
-                $("#device_type").text(res.repair.device_type);
-                $("#status").text(res.repair.status);
-                $("#date_create").text(format_date);
-                $("#date_released").text(res.repair.date_released);
-                $("#issue_desc").text(res.repair.issue_description);
+                //Global Display (Both tabs)
                 $(".labor_fee").text(
                     fee.toLocaleString('en-PH', {
+                        style: 'currency',
+                        currency: 'PHP'
+                    })
+                );
+                $(".parts_amount").text(
+                    parts.toLocaleString('en-PH', {
                         style: 'currency',
                         currency: 'PHP'
                     })
@@ -393,14 +463,49 @@ $(document).ready(function() {
                         currency: 'PHP'
                     })
                 );
+
+
+                //Displat Repair Details Tab
+
+                $(".repair_no").text(res.repair.repair_no);
+                $("#customer_name").text(res.repair.customer_name);
+                $("#customer_number").text(res.repair.contact_number);
+                $("#device_type").text(res.repair.device_type);
+                $("#status").text(res.repair.status);
+                $("#date_create").text(format_date);
+                $("#date_released").text(res.repair.date_released);
                 $(".diagnosis").text(res.repair.diagnosis);
+                $("#issue_desc").text(res.repair.issue_description);
+
+                $(".overallAmount").text(
+                    overallAmount.toLocaleString('en-PH', {
+                        style: 'currency',
+                        currency: 'PHP'
+                    })
+                );
+
+                //Display Data on Diagnosis Tab
                 $("#repairId").val(repair_id);
-
-                $("#total_amount").val(res.repair.total_amount);
-                $(".diagnosis").val(res.repair.diagnosis);
                 $(".labor_fee").val(res.repair.labor_fee);
+                $(".diagnosis").val(res.repair.diagnosis);
 
-                //List of Parts
+                $(document).on('click', '#currentPartsPreview', function() {
+                    //Recall parts for Diagnosis Tab
+                    repairParts = [];
+                    res.parts.forEach(part => {
+                        repairParts.push({
+                            product_id: part.product_id,
+                            name: part.name,
+                            quantity: part.quantity,
+                            selling_price: parseFloat(part
+                                .selling_price_snapshot)
+                        });
+                    });
+                    addRepairTable();
+                });
+
+
+                //Display Parts in Repair Details Tab
                 $.each(res.parts, function(key, item) {
                     tbodyRepair.append(`
                      <tr class="text-center">
@@ -454,6 +559,7 @@ $(document).ready(function() {
         let quantity = $("#quantity").val();
 
         if (!SelectedProductId) {
+            repairParts = [];
             toastr.error('Error, Select Item to picked');
         } else {
             repairParts.push({
@@ -468,8 +574,8 @@ $(document).ready(function() {
 });
 
 function addRepairTable() {
-    tbodyRepair = $(".repairPartsTable");
-
+    let tbodyRepair = $("#repairEditTable");
+    tbodyRepair.empty();
     total = 0;
 
     repairParts.forEach((item, index) => {
@@ -479,8 +585,8 @@ function addRepairTable() {
         <tr>
             <td class="text-start">${item.name}</td>
             <td class="text-center">${item.quantity}</td>
-            <td class="text-center">Unit Price</td>
-            <td class="text-end">₱${subTotal.toLocaleString('en-PH')}</td>
+            <td class="text-center">₱${item.selling_price.toLocaleString('en-PH')}</td>
+            <td class="text-center">₱${subTotal.toLocaleString('en-PH')}</td>
             <td class="text-center">
                 <button type="button" class="btn btn-sm btn-danger" onclick='removePart(${index})'>
                     <i class="fa-solid fa-trash"></i>
@@ -489,12 +595,14 @@ function addRepairTable() {
         </tr>
         `);
     });
-    $("#partsTotal").text(
+
+    $("#partsTotalPreview").text(
         total.toLocaleString('en-PH', {
             style: 'currency',
             currency: 'PHP'
         })
     );
+
     calculateTotalRepair();
 }
 
@@ -504,12 +612,12 @@ function removePart(index) {
 }
 
 function calculateTotalRepair() {
-    let fee = parseFloat($("#labor_fee").val()) || 0;
+    let fee = parseFloat($(".labor_fee").val()) || 0;
     totalOverallPay = fee + total;
 
-    $(".labor_fee").text(fee.toLocaleString('en-PH'));
+    $("#laborFeePreview").text(fee.toLocaleString('en-PH'));
 
-    $("#overAllTotal").text(totalOverallPay.toLocaleString('en-PH'));
+    $("#overallTotalPreview").text(totalOverallPay.toLocaleString('en-PH'));
 }
 
 $(document).on('input', '.labor_fee', function() {

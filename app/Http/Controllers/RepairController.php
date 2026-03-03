@@ -99,10 +99,10 @@ class RepairController extends Controller
         $labor_fee = $request->labor_fee;
         $totalOverallPay = $request->totalOverallPay;
 
-        //When adding parts after diagnosis
-        $prevTotal_amount = $request->total_amount;
-
         $repair = Repairs::findOrFail($repair_id);
+
+        RepairItems::where('repair_id', $repair_id)
+                                        ->delete();
 
         $totalAmount = 0;
 
@@ -131,14 +131,12 @@ class RepairController extends Controller
             $totalAmount += $subTotal;
         }
 
-        $editListAmountTotal = $totalOverallPay + $prevTotal_amount;
-
         $repair->update([
             'diagnosis' => $diagnosis,
             'labor_fee' => $labor_fee,
             'status' => 'awaiting_approval',
             'total_parts_amount' => $totalAmount,
-            'total_amount' => $editListAmountTotal,
+            'total_amount' => $totalOverallPay,
         ]);
 
         DB::commit();
