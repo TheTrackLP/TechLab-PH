@@ -6,9 +6,10 @@ use App\Models\Categories;
 use App\Models\Products;
 use App\Models\RepairItems;
 use App\Models\Repairs;
+use App\Models\Sales;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 class RepairController extends Controller
 {
@@ -166,6 +167,9 @@ class RepairController extends Controller
 
         $statusChange = $request->statusChange;
 
+        $pickup_deadline = date('Y-m-d', strtotime(date('Y-m-d') . "+" . " 7 days"));
+        $generateSaleParts = $request->generateSaleParts;
+
         switch ($statusChange) {
             case 'in_progress':
                 $repair_id->update([
@@ -174,9 +178,28 @@ class RepairController extends Controller
                 break;
             
             case 'completed':
-                $repair_id->update([
-                    'status' => $statusChange
+                if($repair_id->sale_id == null){
+                    $repair_id->update([
+                        'status' => $statusChange,
+                        'completed_at' => now(),
+                        'pickup_deadline' => $pickup_deadline,
                     ]);
+                } else {
+                    $sale = Sales::create([
+                        'invoice_no' => null,
+                        'customer_name' => null,
+                        'total_amount' => 0,
+                        'total_profit' => 0,
+                        'payment_type' => 'cash',
+                        'amount_paid' => 0,
+                        'change_amount' => 0,
+                        'status' => 'completed',
+                        'completed_at' => now(), 
+                    ]);
+
+                    
+                }
+
                 break;
             
             case 'released':

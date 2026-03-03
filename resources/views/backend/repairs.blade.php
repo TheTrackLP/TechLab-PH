@@ -69,7 +69,9 @@ $i = 1;
                                 <span class="badge bg-dark">Abandoned</span>
                                 @endif
                             </td>
-                            <td class="text-center">{{ $repair->pickup_deadline }}</td>
+                            <td class="text-center">
+                                {{ !empty($repair->pickup_deadline) ? date('M d, Y' ,strtotime($repair->pickup_deadline)) : '' }}
+                            </td>
                             <td class="text-center">
                                 <!-- View Button -->
                                 <button class="btn btn-sm btn-info text-white me-1" id="viewRepair"
@@ -493,11 +495,17 @@ $(document).ready(function() {
                         badgeColor.addClass("bg-success");
                         $('#btnApproveRepair').css("display", "none");
                         $('#btnMarkCompleted').css("display", "none");
-                        $('#btnGenerateSale').css("display", "block");
                         $('#btnReleaseUnit').css("display", "none");
                         $('#btnCancelRepair').css("display", "block");
                         $('#btnMarkAbandoned').css("display", "none");
                         $('.diagnosisTab').css("display", "none");
+                        if (res.repair.sale_id == null) {
+                            $('#btnGenerateSale').css("display", "block");
+                        } else {
+                            $('#btnGenerateSale').css("display", "none");
+                            $('#btnReleaseUnit').css("display", "block");
+                            $('#btnCancelRepair').css("display", "none");
+                        }
                         break;
                     case 'released':
                         badgeColor.addClass("bg-success");
@@ -603,12 +611,14 @@ $(document).ready(function() {
                 $(document).on('click', '.btnChangeStatus', function() {
                     let repairStatus_id = repair_id;
                     let statusChange = $(this).data('value');
+                    let generateSaleParts = res.parts;
 
                     $.ajax({
                         type: "post",
                         url: '/admin/repairs/changeRepair-status/' +
                             repairStatus_id,
                         data: {
+                            generateSaleParts: generateSaleParts,
                             statusChange: statusChange,
                             _token: $('meta[name="csrf-token"]').attr(
                                 'content'),
