@@ -53,7 +53,21 @@ $i = 1;
                             <td>{{ $repair->device_brand }}</td>
                             <td class="text-end">₱ {{ number_format($repair->total_amount, 2) }}</td>
                             <td class="text-center">
+                                @if ($repair->status == 'pending_diagnosis')
+                                <span class="badge bg-secondary text-white">Pending Diagnosis</span>
+                                @elseif ($repair->status == 'awaiting_approval')
                                 <span class="badge bg-warning text-dark">Awaiting Approval</span>
+                                @elseif ($repair->status == 'in_progress')
+                                <span class="badge bg-primary">In Progress</span>
+                                @elseif ($repair->status == 'completed')
+                                <span class="badge bg-success">Completed</span>
+                                @elseif ($repair->status == 'released')
+                                <span class="badge bg-dark text-white">Released</span>
+                                @elseif ($repair->status == 'cancelled')
+                                <span class="badge bg-danger">Cancelled</span>
+                                @elseif ($repair->status == 'abandoned')
+                                <span class="badge bg-dark">Abandoned</span>
+                                @endif
                             </td>
                             <td class="text-center">{{ $repair->pickup_deadline }}</td>
                             <td class="text-center">
@@ -61,19 +75,6 @@ $i = 1;
                                 <button class="btn btn-sm btn-info text-white me-1" id="viewRepair"
                                     value="{{ $repair->id }}">
                                     <i class="fa-solid fa-eye"></i>
-                                </button>
-                                <!-- Diagnose Button -->
-                                <!-- <button class="btn btn-sm btn-warning text-dark me-1" id="diagnoseRepair"
-                                    value="{{ $repair->id }}">
-                                    <i class="fa-solid fa-stethoscope"></i>
-                                </button> -->
-                                <!-- Complete Button -->
-                                <button class="btn btn-sm btn-success me-1">
-                                    <i class="fa-solid fa-check"></i>
-                                </button>
-                                <!-- Cancel Button -->
-                                <button class="btn btn-sm btn-danger">
-                                    <i class="fa-solid fa-xmark"></i>
                                 </button>
                             </td>
                         </tr>
@@ -152,12 +153,12 @@ $i = 1;
             <div class="modal-body">
                 <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill"
+                        <button class="nav-link active repairTab" id="pills-home-tab" data-bs-toggle="pill"
                             data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home"
                             aria-selected="true">Repair Details</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill"
+                        <button class="nav-link diagnosisTab" id="pills-profile-tab" data-bs-toggle="pill"
                             data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile"
                             aria-selected="false">Diagnose</button>
                     </li>
@@ -175,7 +176,7 @@ $i = 1;
                                     </div>
                                     <div class="col-md-6">
                                         <p><strong>Status:</strong>
-                                            <span class="badge text-dark badgeColor" id="status"></span>
+                                            <span class="badge" id="badgeColor"></span>
                                         </p>
                                         <p><strong>Received:</strong> <span id="date_create"></span></p>
                                         <p><strong>Pickup Deadline:</strong> <span id="date_released"></span></p>
@@ -218,9 +219,40 @@ $i = 1;
                                     </p>
                                 </div>
                             </div>
-                            <div class="card-footer">
-                                <button class="btn btn-danger" data-bs-dismiss="modal">Cancel Repair</button>
-                                <button class="btn btn-success">Approve Repair</button>
+                            <div class="card-footer border-top bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">
+                                            <i class="fa-solid fa-xmark me-1"></i> Close
+                                        </button>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-2 justify-content-end">
+                                        <button type="button" class="btn btn-danger btnChangeStatus"
+                                            data-value="cancelled" id="btnCancelRepair">
+                                            <i class="fa-solid fa-ban me-1"></i> Cancel Repair
+                                        </button>
+                                        <button type="button" class="btn btn-primary btnChangeStatus"
+                                            data-value="in_progress" id="btnApproveRepair">
+                                            <i class="fa-solid fa-check me-1"></i> Approve Repair
+                                        </button>
+                                        <button type="button" class="btn btn-success btnChangeStatus"
+                                            data-value="completed" id="btnMarkCompleted">
+                                            <i class="fa-solid fa-circle-check me-1"></i> Mark as Completed
+                                        </button>
+                                        <button type="button" class="btn btn-warning text-dark btnChangeStatus"
+                                            data-value="sale" id="btnGenerateSale">
+                                            <i class="fa-solid fa-receipt me-1"></i> Generate Sale
+                                        </button>
+                                        <button type="button" class="btn btn-info text-white btnChangeStatus"
+                                            data-value="released" id="btnReleaseUnit">
+                                            <i class="fa-solid fa-box-open me-1"></i> Release Unit
+                                        </button>
+                                        <button type="button" class="btn btn-secondary btnChangeStatus"
+                                            data-value="abandoned" id="btnMarkAbandoned">
+                                            <i class="fa-solid fa-clock me-1"></i> Mark as Abandoned
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -418,31 +450,84 @@ $(document).ready(function() {
                     hour12: true
                 });
 
-                let badgeColor = $(".badgeColor");
+                let badgeColor = $("#badgeColor");
+                badgeColor.attr("class", "badge text-white");
+                badgeColor.removeClass(
+                    "bg-secondary bg-warning bg-primary bg-success bg-dark bg-warning bg-danger"
+                );
 
                 let status = res.repair.status;
                 switch (status) {
                     case 'pending_diagnosis':
                         badgeColor.addClass("bg-secondary");
                         badgeColor.addClass("text-white");
+                        $('#btnApproveRepair').css("display", "none");
+                        $('#btnMarkCompleted').css("display", "none");
+                        $('#btnGenerateSale').css("display", "none");
+                        $('#btnReleaseUnit').css("display", "none");
+                        $('#btnCancelRepair').css("display", "none");
+                        $('#btnMarkAbandoned').css("display", "none");
+                        $('.diagnosisTab').css("display", "block");
                         break;
                     case 'awaiting_approval':
                         badgeColor.addClass("bg-warning");
+                        $('#btnApproveRepair').css("display", "block");
+                        $('#btnMarkCompleted').css("display", "none");
+                        $('#btnGenerateSale').css("display", "none");
+                        $('#btnReleaseUnit').css("display", "none");
+                        $('#btnCancelRepair').css("display", "none");
+                        $('#btnMarkAbandoned').css("display", "none");
+                        $('.diagnosisTab').css("display", "block");
                         break;
                     case 'in_progress':
                         badgeColor.addClass("bg-primary");
+                        $('#btnApproveRepair').css("display", "none");
+                        $('#btnMarkCompleted').css("display", "block");
+                        $('#btnGenerateSale').css("display", "none");
+                        $('#btnReleaseUnit').css("display", "none");
+                        $('#btnCancelRepair').css("display", "block");
+                        $('#btnMarkAbandoned').css("display", "none");
+                        $('.diagnosisTab').css("display", "none");
                         break;
                     case 'completed':
                         badgeColor.addClass("bg-success");
+                        $('#btnApproveRepair').css("display", "none");
+                        $('#btnMarkCompleted').css("display", "none");
+                        $('#btnGenerateSale').css("display", "block");
+                        $('#btnReleaseUnit').css("display", "none");
+                        $('#btnCancelRepair').css("display", "block");
+                        $('#btnMarkAbandoned').css("display", "none");
+                        $('.diagnosisTab').css("display", "none");
                         break;
                     case 'released':
                         badgeColor.addClass("bg-success");
+                        $('#btnApproveRepair').css("display", "none");
+                        $('#btnMarkCompleted').css("display", "none");
+                        $('#btnGenerateSale').css("display", "none");
+                        $('#btnReleaseUnit').css("display", "none");
+                        $('#btnCancelRepair').css("display", "none");
+                        $('#btnMarkAbandoned').css("display", "none");
+                        $('.diagnosisTab').css("display", "none");
                         break;
                     case 'cancelled':
                         badgeColor.addClass("bg-danger");
+                        $('#btnApproveRepair').css("display", "none");
+                        $('#btnMarkCompleted').css("display", "none");
+                        $('#btnGenerateSale').css("display", "none");
+                        $('#btnReleaseUnit').css("display", "none");
+                        $('#btnCancelRepair').css("display", "none");
+                        $('#btnMarkAbandoned').css("display", "none");
+                        $('.diagnosisTab').css("display", "none");
                         break;
                     case 'abandoned':
                         badgeColor.addClass("bg-dark");
+                        $('#btnApproveRepair').css("display", "none");
+                        $('#btnMarkCompleted').css("display", "none");
+                        $('#btnGenerateSale').css("display", "none");
+                        $('#btnReleaseUnit').css("display", "none");
+                        $('#btnCancelRepair').css("display", "none");
+                        $('#btnMarkAbandoned').css("display", "none");
+                        $('.diagnosisTab').css("display", "none");
                 }
                 //Global Display (Both tabs)
                 $(".labor_fee").text(
@@ -464,14 +549,12 @@ $(document).ready(function() {
                     })
                 );
 
-
                 //Displat Repair Details Tab
-
                 $(".repair_no").text(res.repair.repair_no);
                 $("#customer_name").text(res.repair.customer_name);
                 $("#customer_number").text(res.repair.contact_number);
                 $("#device_type").text(res.repair.device_type);
-                $("#status").text(res.repair.status);
+                $("#badgeColor").text(res.repair.status);
                 $("#date_create").text(format_date);
                 $("#date_released").text(res.repair.date_released);
                 $(".diagnosis").text(res.repair.diagnosis);
@@ -516,6 +599,35 @@ $(document).ready(function() {
                     </tr>
                     `);
                 });
+
+                $(document).on('click', '.btnChangeStatus', function() {
+                    let repairStatus_id = repair_id;
+                    let statusChange = $(this).data('value');
+
+                    $.ajax({
+                        type: "post",
+                        url: '/admin/repairs/changeRepair-status/' +
+                            repairStatus_id,
+                        data: {
+                            statusChange: statusChange,
+                            _token: $('meta[name="csrf-token"]').attr(
+                                'content'),
+                        },
+                        success: function(res) {
+                            Swal.fire({
+                                title: "Repair Status Updated",
+                                text: "Repair has been " + res
+                                    .status + " | " +
+                                    res.repair_no,
+                                icon: "success",
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    location.reload();
+                                }
+                            });
+                        }
+                    })
+                });
             }
         });
     });
@@ -533,7 +645,7 @@ $(document).ready(function() {
                 $.each(res.products, function(key, product) {
                     showProducts.append(`
                         <option value=""></option>
-                        <option value="${product.id}" data-id="${product.id}" data-name="${product.name}" data-price="${product.selling_price}">${product.name}</option>
+                        <option value="${product.id}" data-id="${product.id}" data-name="${product.name}" data-price="${product.selling_price}" data-stock="${product.stock_quantity}">${product.name}</option>
                     `);
                 });
 
@@ -545,6 +657,7 @@ $(document).ready(function() {
         var price = $(this).find(':selected').data('price') || 0;
         var productMame = $(this).find(':selected').data('name') || 0;
         var product_id = $(this).find(':selected').data('id') || 0;
+        var stock = $(this).find(':selected').data('stock') || 0;
 
         $("#unit_price").val(parseFloat(price).toFixed(2));
         SelectedProductId = product_id;
@@ -558,16 +671,27 @@ $(document).ready(function() {
         let selling_price = $("#unit_price").val();
         let quantity = $("#quantity").val();
 
-        if (!SelectedProductId) {
-            repairParts = [];
-            toastr.error('Error, Select Item to picked');
+        let existing = repairParts.find(item => item.product_id === id);
+
+        if (existing) {
+            if (existing.quantity < stock) {
+                existing.quantity += 1;
+            } else {
+                toastr.error("Error", "Stock limit reached");
+            }
         } else {
-            repairParts.push({
-                product_id: id,
-                name: name,
-                selling_price: selling_price,
-                quantity: quantity,
-            });
+
+            if (!SelectedProductId) {
+                repairParts = [];
+                toastr.error('Error, Select Item to picked');
+            } else {
+                repairParts.push({
+                    product_id: id,
+                    name: name,
+                    selling_price: selling_price,
+                    quantity: quantity,
+                });
+            }
         }
         addRepairTable();
     });
@@ -612,7 +736,7 @@ function removePart(index) {
 }
 
 function calculateTotalRepair() {
-    let fee = parseFloat($(".labor_fee").val()) || 0;
+    let fee = parseFloat($("#labor_fee").val()) || 0;
     totalOverallPay = fee + total;
 
     $("#laborFeePreview").text(fee.toLocaleString('en-PH'));
@@ -633,7 +757,7 @@ $(document).on('click', '#saveRepair', function() {
             totalOverallPay: totalOverallPay,
             diagnosis: $("#diagnosis").val(),
             total_amount: $("#total_amount").val() || 0,
-            labor_fee: $(".labor_fee").val() || 0,
+            labor_fee: $("#labor_fee").val() || 0,
             repairId: $("#repairId").val() || 0,
             _token: $('meta[name="csrf-token"]').attr('content'),
         },

@@ -85,6 +85,7 @@ Route::middleware('auth')->group(function(){
         Route::get('/admin/repairs/view/{id}', 'getRepairDetails');
         Route::post('/admin/repairs/update', 'RepairUpdate')->name('repair.update');
         Route::get('/admin/products/category/{id}', 'getProductsbyCategory');
+        Route::post('/admin/repairs/changeRepair-status/{id}', 'changeRepairStatus');
     });
 });
 

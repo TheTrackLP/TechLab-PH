@@ -125,7 +125,6 @@ class RepairController extends Controller
                 'subTotal' => $subTotal,
             ]);
 
-            $product->stock_quantity -= $item['quantity'];
             $product->save();
 
             $totalAmount += $subTotal;
@@ -159,6 +158,56 @@ class RepairController extends Controller
 
         return response()->json([
             'products'=>$products,
+        ]);
+    }
+
+    public function changeRepairStatus(Request $request, $id){
+        $repair_id = Repairs::findOrFail($id);
+
+        $statusChange = $request->statusChange;
+
+        switch ($statusChange) {
+            case 'in_progress':
+                $repair_id->update([
+                    'status' => $statusChange
+                    ]);
+                break;
+            
+            case 'completed':
+                $repair_id->update([
+                    'status' => $statusChange
+                    ]);
+                break;
+            
+            case 'released':
+                $repair_id->update([
+                    'status' => $statusChange
+                    ]);
+                break;
+            
+            case 'cancelled':
+                $repair_id->update([
+                    'status' => $statusChange
+                    ]);
+                break;
+
+            case 'abandoned':
+                $repair_id->update([
+                    'status' => $statusChange
+                    ]);
+                break;
+            
+            default:
+                return redirect()->route('backend.repairs')->with([
+                    'message' => 'Error, on changing Status',
+                    'alert-type' => 'error', 
+                ]);
+        }
+
+        return response()->json([
+            'message' => 'Repair approved successfully',
+            'repair_no' => $repair_id->repair_no,
+            'status' => $statusChange,
         ]);
     }
 }
