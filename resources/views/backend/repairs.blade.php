@@ -205,20 +205,51 @@ $i = 1;
 
                                     </tbody>
                                 </table>
-                                <div class="text-end border-top pt-3 mt-3">
-                                    <p class="mb-1">
-                                        <strong>Labor Fee:</strong>
-                                        <span class="labor_fee"></span>
-                                    </p>
-                                    <p class="mb-1">
-                                        <strong>Parts Total:</strong>
-                                        <span class="parts_amount text-dark"></span>
-                                    </p>
-                                    <hr class="my-2">
-                                    <p class="fs-5 mb-0">
-                                        <strong>Total Amount:</strong>
-                                        <span class="overallAmount fw-bold text-success"></span>
-                                    </p>
+                                <div class="border-top pt-3 mt-3">
+
+                                    <div class="row">
+
+                                        <!-- LEFT: COST BREAKDOWN -->
+                                        <div class="col-md-6">
+                                            <div class="bg-light p-3 rounded border">
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span>Labor Fee</span>
+                                                    <span class="labor_fee fw-semibold"></span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span>Parts Total</span>
+                                                    <span class="parts_amount fw-semibold"></span>
+                                                </div>
+                                                <hr>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span>Change</span>
+                                                    <span class="changeDisplayAmount fw-semibold">P 0.00</span>
+                                                </div>
+                                                <hr>
+                                                <div class="d-flex justify-content-between fs-5">
+                                                    <strong>Total Amount</strong>
+                                                    <strong class="overallAmount text-success"></strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="bg-white p-3 rounded border">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Payment Type</label>
+                                                    <select class="form-select" id="payment_type">
+                                                        <option value="cash">Cash</option>
+                                                        <option value="gcash">GCash</option>
+                                                        <option value="bank_transfer">Bank Transfer</option>
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Amount Paid</label>
+                                                    <input type="number" step="0.01" class="form-control"
+                                                        id="amount_paid">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="card-footer border-top bg-light">
@@ -242,7 +273,7 @@ $i = 1;
                                             <i class="fa-solid fa-circle-check me-1"></i> Mark as Completed
                                         </button>
                                         <button type="button" class="btn btn-warning text-dark btnChangeStatus"
-                                            data-value="sale" id="btnGenerateSale">
+                                            data-value="generate_sale" id="btnGenerateSale" disabled>
                                             <i class="fa-solid fa-receipt me-1"></i> Generate Sale
                                         </button>
                                         <button type="button" class="btn btn-info text-white btnChangeStatus"
@@ -342,7 +373,6 @@ $i = 1;
                                         </tbody>
                                     </table>
                                 </div>
-                                <input type="hidden" name="total_amount" id="total_amount">
                                 <hr>
                                 <div class="row mt-4 g-4">
                                     <!-- Current Saved Total -->
@@ -424,6 +454,8 @@ $i = 1;
 let repairParts = [];
 let total = 0;
 let totalOverallPay = 0;
+let change = 0;
+let fee = 0;
 let SelectedProductId = null;
 let selectedProductName = null;
 
@@ -595,6 +627,35 @@ $(document).ready(function() {
                     addRepairTable();
                 });
 
+                $(document).on('input', '#amount_paid', function() {
+                    let amountPaid = parseFloat($(this).val()) || 0;
+                    let totalAmount = res.repair.total_amount;
+
+                    change = amountPaid - totalAmount;
+
+                    if (change < 0) {
+                        $(".changeDisplayAmount")
+                            .removeClass("text-success")
+                            .addClass("text-danger")
+                            .text("₱0.00");
+                    } else {
+                        $(".changeDisplayAmount")
+                            .removeClass("text-danger")
+                            .addClass("text-success")
+                            .text(
+                                change.toLocaleString('en-PH', {
+                                    style: 'currency',
+                                    currency: 'PHP'
+                                })
+                            );
+                    }
+                    if (amountPaid < totalAmount) {
+                        $("#btnGenerateSale").prop("disabled", true);
+                    } else {
+                        $("#btnGenerateSale").prop("disabled", false);
+                    }
+                });
+
 
                 //Display Parts in Repair Details Tab
                 $.each(res.parts, function(key, item) {
@@ -612,6 +673,8 @@ $(document).ready(function() {
                     let repairStatus_id = repair_id;
                     let statusChange = $(this).data('value');
                     let generateSaleParts = res.parts;
+                    let sale_id = res.repair.sale_id;
+                    let labor_fee = res.repair.labor_fee;
 
                     $.ajax({
                         type: "post",
@@ -620,13 +683,17 @@ $(document).ready(function() {
                         data: {
                             generateSaleParts: generateSaleParts,
                             statusChange: statusChange,
+                            change: change,
+                            labor_fee: labor_fee,
+                            amountPaid: $("#amount_paid").val() || 0,
                             _token: $('meta[name="csrf-token"]').attr(
                                 'content'),
                         },
                         success: function(res) {
                             Swal.fire({
                                 title: "Repair Status Updated",
-                                text: "Repair has been " + res
+                                text: "Repair has been " +
+                                    res
                                     .status + " | " +
                                     res.repair_no,
                                 icon: "success",
@@ -766,7 +833,6 @@ $(document).on('click', '#saveRepair', function() {
             repairParts: repairParts,
             totalOverallPay: totalOverallPay,
             diagnosis: $("#diagnosis").val(),
-            total_amount: $("#total_amount").val() || 0,
             labor_fee: $("#labor_fee").val() || 0,
             repairId: $("#repairId").val() || 0,
             _token: $('meta[name="csrf-token"]').attr('content'),

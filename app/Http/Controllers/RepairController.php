@@ -7,6 +7,8 @@ use App\Models\Products;
 use App\Models\RepairItems;
 use App\Models\Repairs;
 use App\Models\Sales;
+use App\Models\salesItem;
+use App\Models\StockMovements;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -166,65 +168,125 @@ class RepairController extends Controller
         $repair_id = Repairs::findOrFail($id);
 
         $statusChange = $request->statusChange;
+        $labor_fee = $request->labor_fee;
 
         $pickup_deadline = date('Y-m-d', strtotime(date('Y-m-d') . "+" . " 7 days"));
-        $generateSaleParts = $request->generateSaleParts;
 
-        switch ($statusChange) {
-            case 'in_progress':
-                $repair_id->update([
-                    'status' => $statusChange
-                    ]);
-                break;
-            
-            case 'completed':
-                if($repair_id->sale_id == null){
-                    $repair_id->update([
-                        'status' => $statusChange,
-                        'completed_at' => now(),
-                        'pickup_deadline' => $pickup_deadline,
-                    ]);
-                } else {
-                    $sale = Sales::create([
-                        'invoice_no' => null,
-                        'customer_name' => null,
-                        'total_amount' => 0,
-                        'total_profit' => 0,
-                        'payment_type' => 'cash',
-                        'amount_paid' => 0,
-                        'change_amount' => 0,
-                        'status' => 'completed',
-                        'completed_at' => now(), 
+        if($statusChange == 'in_progress'){
+            $repair_id->update([
+                'status' => $statusChange
+            ]);
+        } elseif($statusChange == 'completed'){
+            $repair_id->update([
+                'status' => $statusChange,
+                'completed_at' => now(),
+                'pickup_deadline' => $pickup_deadline,
+            ]);
+        } elseif($statusChange == 'generate_sale'){
+            DB::beginTransaction();
+            try{
+                $generateSaleParts = $request->generateSaleParts;
+                $change = $request->change;
+                $amountPaid = $request->amountPaid;
+
+                $sale = Sales::create([
+                    'invoice_no' => null,
+                    'customer_name' => null,
+                    'total_amount' => 0,
+                    'total_profit' => 0,
+                    'payment_type' => 'cash',
+                    'amount_paid' => $amountPaid,
+                    'change_amount' => $change,
+                    'status' => 'completed',
+                    'completed_at' => now(), 
+                ]);
+
+                $totalAmount = 0;
+                $totalProfit = 0;
+
+                foreach ($generateSaleParts as $item) {
+                    $product = Products::lockForUpdate()->findOrFail($item['product_id']);
+
+                    if($product->stock_quantity < $item['quantity']){
+                        throw new \Exception("Insufficient stock for {$product->name}");
+                    }
+                    $subTotal = $item['quantity'] * $product->selling_price + $labor_fee;
+                    $profit = ($product->selling_price - $product->cost_price) * $item['quantity'];
+
+                    salesItem::create([
+                        'sale_id' => $sale->id,
+                        'product_id' => $product->id,
+                        'quantity' => $item['quantity'],
+                        'cost_price_snapshot' => $product->cost_price,
+                        'selling_price_snapshot' => $product->selling_price,
+                        'subtotal' => $subTotal,
+                        'profit' => $profit,
                     ]);
 
-                    
+                    $product->stock_quantity -= $item['quantity'];
+                    $product->save();
+
+                    $totalAmount += $subTotal;
+                    $totalProfit += $profit;
+
+                    StockMovements::create([
+                        'product_id' => $product->id,
+                        'type' => 'sale',
+                        'quantity' => -$item['quantity'],
+                        'reference_id' => $sale->id,
+                        'notes' => null,
+                        'created_by' => null,
+                    ]);
                 }
 
-                break;
-            
-            case 'released':
-                $repair_id->update([
-                    'status' => $statusChange
-                    ]);
-                break;
-            
-            case 'cancelled':
-                $repair_id->update([
-                    'status' => $statusChange
-                    ]);
-                break;
+                $year = now()->year;
 
-            case 'abandoned':
-                $repair_id->update([
-                    'status' => $statusChange
-                    ]);
-                break;
-            
-            default:
-                return redirect()->route('backend.repairs')->with([
-                    'message' => 'Error, on changing Status',
-                    'alert-type' => 'error', 
+                $lastSale = Sales::whereYear('created_at', $year)
+                                ->whereNotNull('invoice_no')
+                                ->orderBy('id', 'desc')
+                                ->first();
+
+                $nextNumber = $lastSale ? intval(substr($lastSale->invoice_no, -5)) + 1: 1;
+
+                $invoice = "TL-" . $year . "-". str_pad($nextNumber, 5, "0", STR_PAD_LEFT);
+
+                $sale->update([
+                    'invoice_no' => $invoice,
+                    'total_amount' => $totalAmount,
+                    'total_profit' => $totalProfit,
                 ]);
+
+                $repair_id->update([
+                    'sale_id'=>$sale->id,
+                ]);
+
+                DB::commit();
+
+                return response()->json([
+                    'message' => 'Sale completed successfully.',
+                    'invoice_no' => $invoice,
+                    'statusChange' => $statusChange,
+                ]);
+            }catch (\Exception $e) {
+                DB::rollBack();
+                
+                return response()->json([
+                    'message' => $e->getMessage()
+                    ], 400);
+            }   
+        } elseif($statusChange == 'released'){
+            $repair_id->update([
+                'status' => $statusChange,
+                'released_at' => now(),
+            ]);
+        } elseif($statusChange == 'cancelled'){
+            $repair_id->update([
+                'status' => $statusChange
+            ]);
+        } elseif($statusChange == 'abandoned'){
+            $repair_id->update([
+                'status' => $statusChange
+            ]);
         }
 
         return response()->json([
