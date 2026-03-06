@@ -203,6 +203,8 @@ class RepairController extends Controller
 
                 $totalAmount = 0;
                 $totalProfit = 0;
+                $overAllAmount = 0;
+                $overAllProft = 0;
 
                 foreach ($generateSaleParts as $item) {
                     $product = Products::lockForUpdate()->findOrFail($item['product_id']);
@@ -250,10 +252,13 @@ class RepairController extends Controller
 
                 $invoice = "TL-" . $year . "-". str_pad($nextNumber, 5, "0", STR_PAD_LEFT);
 
+                $overAllAmount = $totalAmount + $labor_fee;
+                $overAllProft = $totalProfit + $labor_fee;
+
                 $sale->update([
                     'invoice_no' => $invoice,
-                    'total_amount' => $totalAmount,
-                    'total_profit' => $totalProfit,
+                    'total_amount' => $overAllAmount,
+                    'total_profit' => $overAllProft,
                 ]);
 
                 $repair_id->update([
