@@ -57,7 +57,7 @@
                     </div>
                     Stock Movements
                 </a>
-                <!-- SALES -->
+                <!-- SALES/RETURNS -->
                 <div class="sb-sidenav-menu-heading">Sales</div>
                 <a class="nav-link button-hover {{ request()->routeIs('sales.*') ? 'active' : '' }}"
                     href="{{ route('sales.index') }}">
@@ -65,6 +65,13 @@
                         <i class="fas fa-cash-register"></i>
                     </div>
                     POS
+                </a>
+                <a class="nav-link button-hover {{ request()->routeIs('return.*') ? 'active' : '' }}"
+                    href="{{ route('return.index') }}">
+                    <div class="sb-nav-link-icon">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </div>
+                    Return
                 </a>
                 <!-- SERVICES -->
                 <div class="sb-sidenav-menu-heading">Services</div>

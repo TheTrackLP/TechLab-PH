@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RepairController;
 use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\StocksController;
 use App\Http\Controllers\SupplierController;
@@ -86,6 +87,11 @@ Route::middleware('auth')->group(function(){
         Route::post('/admin/repairs/update', 'RepairUpdate')->name('repair.update');
         Route::get('/admin/products/category/{id}', 'getProductsbyCategory');
         Route::post('/admin/repairs/changeRepair-status/{id}', 'changeRepairStatus');
+    });
+
+    Route::controller(ReturnController::class)->group(function(){
+        Route::get('/admin/returns', 'ReturnIdex')->name('return.index');
+        Route::get('/admin/returns/invoice/{invoice_no}', 'GetInvoiceNo');
     });
 });
 
