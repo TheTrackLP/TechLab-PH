@@ -16,7 +16,6 @@ class ReturnController extends Controller
         $sale = Sales::where('invoice_no', $invoice_no)->first();
         $saleItems = salesItem::select(
             "sales_items.*",
-            "sales.*",
             "products.name",
         )
         ->join('sales', 'sales.id', '=', 'sales_items.sale_id')

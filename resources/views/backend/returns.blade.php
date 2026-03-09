@@ -46,7 +46,7 @@
         <div class="card-body">
             <h6 class="mb-3">Purchased Items</h6>
             <div class="table-responsive">
-                <table class="table table-bordered align-middle">
+                <table class="table table-bordered table-hover align-middle">
                     <thead class="table-dark text-center">
                         <tr>
                             <th>Select</th>
@@ -71,11 +71,12 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">Return Reason</label>
-                    <select class="form-select">
-                        <option>Defective</option>
-                        <option>Wrong Item</option>
-                        <option>Customer Changed Mind</option>
-                        <option>Damaged</option>
+                    <select class="form-select select2">
+                        <option value=""></option>
+                        <option class="defective">Defective</option>
+                        <option class="wrong_item">Wrong Item</option>
+                        <option class="customer_change_mind">Customer Changed Mind</option>
+                        <option class="damaged">Damaged</option>
                     </select>
                 </div>
                 <div class="col-md-6">
@@ -138,27 +139,44 @@ $(document).ready(function() {
                         returnBody.append(`
                         <tr>
                             <td class="text-center">
-                                <input type="checkbox" id="checkboxItem" data-id=${item.product_id} data-price=${item.selling_price_snapshot}>
+                                <input type="checkbox" class="checkboxItem" data-id="${item.id}" data-price="${item.selling_price_snapshot}">
                             </td>
                             <td>${item.name}</td>
                             <td class="text-center">${item.quantity}</td>
                             <td class="text-end">₱${item.selling_price_snapshot.toLocaleString('en-PH')}</td>
                             <td class="text-end">₱${item.subtotal.toLocaleString('en-PH')}</td>
                             <td>
-                                <input type="number" class="form-control" min="1" max="2" placeholder="Qty">
+                                <input type="number" class="form-control text-center itemQTY" id="" min="1" max="2" placeholder="Qty" disabled>
                             </td>
                         </tr>
                         `)
                     });
                 }
 
-                $(document).on('change', '#checkboxItem', function() {
+                $(document).on('change', '.checkboxItem', function() {
                     let selectedItem = $(this).data('id');
                     let selectedPrice = parseFloat($(this).data('price'));
 
-                    totalReturnAmount += selectedPrice;
+                    let qtyInput = ".itemQTY" + selectedItem;
+                    console.log(selectedItem);
+                    console.log(qtyInput);
+
+                    if (this.checked) {
+                        $(qtyInput).prop("disabled", true);
+                        console.log('check');
+                    } else {
+                        console.log('uncheck');
+                        $(qtyInput).prop("disabled", false);
+                    }
 
                     console.log(totalReturnAmount);
+                });
+            },
+            error: function(res) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Invoice " + invoice + " not found",
+                    text: "Please check the invoice number!",
                 });
             }
         });
