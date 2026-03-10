@@ -92,6 +92,7 @@ Route::middleware('auth')->group(function(){
     Route::controller(ReturnController::class)->group(function(){
         Route::get('/admin/returns', 'ReturnIdex')->name('return.index');
         Route::get('/admin/returns/invoice/{invoice_no}', 'GetInvoiceNo');
+        Route::post('/admin/returns/store', 'StoreReturnItems');
     });
 });
 
