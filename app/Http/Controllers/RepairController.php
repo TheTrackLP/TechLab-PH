@@ -203,7 +203,6 @@ class RepairController extends Controller
 
                 $totalAmount = 0;
                 $totalProfit = 0;
-                $overAllAmount = 0;
                 $overAllProft = 0;
 
                 foreach ($generateSaleParts as $item) {
@@ -212,7 +211,7 @@ class RepairController extends Controller
                     if($product->stock_quantity < $item['quantity']){
                         throw new \Exception("Insufficient stock for {$product->name}");
                     }
-                    $subTotal = $item['quantity'] * $product->selling_price + $labor_fee;
+                    $subTotal = $item['quantity'] * $product->selling_price;
                     $profit = ($product->selling_price - $product->cost_price) * $item['quantity'];
 
                     salesItem::create([
@@ -252,7 +251,7 @@ class RepairController extends Controller
 
                 $invoice = "TL-" . $year . "-". str_pad($nextNumber, 5, "0", STR_PAD_LEFT);
 
-                $overAllAmount = $totalAmount;
+                $overAllAmount = $totalAmount + $labor_fee;
                 $overAllProft = $totalProfit + $labor_fee;
 
                 $sale->update([

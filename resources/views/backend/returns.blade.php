@@ -170,6 +170,8 @@ $(document).ready(function() {
                     }
                 });
                 $(document).on('input', ".itemQTY", function() {
+                    let returnItemQTY = parseInt($(this).val()) || 0;
+
                     $('.checkboxItem:checked').each(function() {
                         returnItemID = $(this).data('id');
                         returnItemName = $(this).data('name');
@@ -177,13 +179,9 @@ $(document).ready(function() {
                             'price')) || 0;
 
                         let row = $(this).closest('tr');
-                        returnItemQTY = parseInt(row.find(
-                            '.itemQTY').val()) || 0;
                     });
 
                     if (returnItemQTY > 0) {
-                        totalReturnAmount += returnItemPrice * returnItemQTY;
-
                         returnItems.push({
                             product_id: returnItemID,
                             name: returnItemName,
@@ -191,6 +189,8 @@ $(document).ready(function() {
                             quantity: returnItemQTY
                         });
                     }
+                    let subTotal = returnItemPrice * returnItemQTY;
+                    totalReturnAmount += subTotal;
 
                     $("#returnTotalAmount").text(
                         totalReturnAmount.toLocaleString(
@@ -200,6 +200,7 @@ $(document).ready(function() {
                             })
                     );
                 });
+
             },
             error: function(res) {
                 Swal.fire({
