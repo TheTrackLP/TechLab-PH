@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('returns', function (Blueprint $table) {
             $table->id();
             $table->foreignId('sale_id');
-            $table->string('return_no');
+            $table->string('return_no')->nullable();
             $table->enum('return_type', ['refund', 'exhange']);
             $table->float('total_amount');
-            $table->enum('reason', ['defective', 'wrong_item', 'damaged', 'changed_item']);
+            $table->enum('reason', ['defective', 'wrong_item', 'damaged', 'customer_change_mind']);
             $table->text('notes')->nullable();
             $table->integer('created_by');
             $table->timestamps();

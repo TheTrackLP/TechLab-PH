@@ -69,17 +69,25 @@
         <div class="card-body">
             <h6 class="mb-3">Return Details</h6>
             <div class="row g-3">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label class="form-label">Return Reason</label>
                     <select class="form-select select2" id="reason">
                         <option value=""></option>
-                        <option class="defective">Defective</option>
-                        <option class="wrong_item">Wrong Item</option>
-                        <option class="customer_change_mind">Customer Changed Mind</option>
-                        <option class="damaged">Damaged</option>
+                        <option value="defective">Defective</option>
+                        <option value="wrong_item">Wrong Item</option>
+                        <option value="customer_change_mind">Customer Changed Mind</option>
+                        <option value="damaged">Damaged</option>
                     </select>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <label class="form-label">Return Type</label>
+                    <select class="form-select select2" id="reason_type">
+                        <option value=""></option>
+                        <option class="refund">Refund</option>
+                        <option class="exchange">Exchange</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
                     <label class="form-label">Notes</label>
                     <input type="text" class="form-control" id="notes" placeholder="Optional notes">
                 </div>
@@ -112,13 +120,13 @@
 <script>
 let totalReturnAmount = 0;
 let returnItems = [];
+let sale_id = null;
 let returnItemID = null;
 let returnItemPrice = null;
 let returnItemName = null;
 $(document).ready(function() {
     $(document).on('click', '#getInvoiceNo', function() {
         let invoice = $("#getInvoice").val();
-
         let returnBody = $("#returnItemsTable");
         returnBody.empty();
 
@@ -127,6 +135,7 @@ $(document).ready(function() {
             url: "/admin/returns/invoice/" + invoice,
             success: function(res) {
                 console.log(res);
+                sale_id = res.sale.id;
                 $("#invoice_no").text(res.sale.invoice_no);
                 $("#invoice_customer").text(res.sale.customer_name);
                 $("#invoice_date").text(res.sale.completed_at);
@@ -150,9 +159,6 @@ $(document).ready(function() {
 
                 $(document).on('change', '.checkboxItem', function() {
                     let qtyInput = $(this).closest('tr').find('.itemQTY');
-                    returnItemID = $(this).data('id');
-                    returnItemPrice = parseFloat($(this).data('price'));
-                    returnItemName = $(this).data('name');
 
                     if (this.checked) {
                         $(qtyInput).prop("disabled", false);
@@ -164,14 +170,18 @@ $(document).ready(function() {
                 $(document).on('input', ".itemQTY", function() {
                     $('.checkboxItem:checked').each(function() {
 
-                        let price = parseFloat($(this).data(
+                        totalReturnAmount = 0
+                        returnItemID = $(this).data('id');
+                        returnItemName = $(this).data('name');
+                        returnItemPrice = parseFloat($(this).data(
                             'price')) || 0;
+
                         let row = $(this).closest('tr');
                         let qty = parseInt(row.find(
                             '.itemQTY').val()) || 0;
 
                         if (qty > 0) {
-                            totalReturnAmount += price * qty;
+                            totalReturnAmount += returnItemPrice * qty;
 
                             returnItems.push({
                                 product_id: returnItemID,
@@ -190,26 +200,6 @@ $(document).ready(function() {
                             })
                     );
                 });
-
-                $(document).on('click', '#confirmReturnItems', function() {
-                    $.ajax({
-                        type: "POST",
-                        url: "/admin/returns/store",
-                        data: {
-                            returnItems: returnItems,
-                            totalReturnAmount: totalReturnAmount,
-                            reason: reason,
-                            notes: notes,
-                            amount_paid: parseFloat($("#amountPaid")
-                                .val()) || 0,
-                            _token: $('meta[name="csrf-token"]').attr(
-                                'content'),
-                        },
-                        success: function(res) {
-
-                        }
-                    });
-                });
             },
             error: function(res) {
                 Swal.fire({
@@ -219,6 +209,37 @@ $(document).ready(function() {
                 });
             }
         });
+    });
+});
+$(document).on('click', '#confirmReturnItems', function() {
+    $.ajax({
+        type: "post",
+        url: "/admin/returns/store",
+        data: {
+            returnItems: returnItems,
+            totalReturnAmount: totalReturnAmount,
+            reason: $("#reason").val(),
+            notes: $("#notes").val(),
+            reason_type: $("#reason_type").val(),
+            sale_id: sale_id,
+            _token: $('meta[name="csrf-token"]').attr('content'),
+        },
+        success: function(res) {
+            Swal.fire({
+                title: "Return Complete",
+                text: "Return No is " + res
+                    .return_no,
+                icon: "success",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    location.reload();
+                }
+            });
+            returnItems = [];
+        },
+        error: function(xhr) {
+            alert(xhr.responseJSON.message);
+        }
     });
 });
 </script>
