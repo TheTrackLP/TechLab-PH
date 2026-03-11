@@ -19,7 +19,7 @@ return new class extends Migration
             $table->float('total_amount');
             $table->enum('reason', ['defective', 'wrong_item', 'damaged', 'customer_change_mind']);
             $table->text('notes')->nullable();
-            $table->integer('created_by');
+            $table->integer('created_by')->nullable();
             $table->timestamps();
         });
     }

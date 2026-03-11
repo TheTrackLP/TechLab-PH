@@ -124,6 +124,8 @@ let sale_id = null;
 let returnItemID = null;
 let returnItemPrice = null;
 let returnItemName = null;
+let returnItemQTY = 0
+
 $(document).ready(function() {
     $(document).on('click', '#getInvoiceNo', function() {
         let invoice = $("#getInvoice").val();
@@ -169,28 +171,26 @@ $(document).ready(function() {
                 });
                 $(document).on('input', ".itemQTY", function() {
                     $('.checkboxItem:checked').each(function() {
-
-                        totalReturnAmount = 0
                         returnItemID = $(this).data('id');
                         returnItemName = $(this).data('name');
                         returnItemPrice = parseFloat($(this).data(
                             'price')) || 0;
 
                         let row = $(this).closest('tr');
-                        let qty = parseInt(row.find(
+                        returnItemQTY = parseInt(row.find(
                             '.itemQTY').val()) || 0;
-
-                        if (qty > 0) {
-                            totalReturnAmount += returnItemPrice * qty;
-
-                            returnItems.push({
-                                product_id: returnItemID,
-                                name: returnItemName,
-                                price: returnItemPrice,
-                                quantity: qty
-                            });
-                        }
                     });
+
+                    if (returnItemQTY > 0) {
+                        totalReturnAmount += returnItemPrice * returnItemQTY;
+
+                        returnItems.push({
+                            product_id: returnItemID,
+                            name: returnItemName,
+                            price: returnItemPrice,
+                            quantity: returnItemQTY
+                        });
+                    }
 
                     $("#returnTotalAmount").text(
                         totalReturnAmount.toLocaleString(

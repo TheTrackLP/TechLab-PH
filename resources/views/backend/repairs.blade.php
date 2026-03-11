@@ -458,7 +458,7 @@ let change = 0;
 let fee = 0;
 let SelectedProductId = null;
 let selectedProductName = null;
-
+let sale_id = null;
 $(document).ready(function() {
     $(document).on('click', '#viewRepair', function() {
         var repair_id = $(this).val();
@@ -471,6 +471,7 @@ $(document).ready(function() {
             type: "get",
             url: '/admin/repairs/view/' + repair_id,
             success: function(res) {
+                sale_id = res.repair.sale_id;
                 let rawDate = res.repair.created_at;
                 let formattedDate = new Date(rawDate.replace(' ', 'T'));
                 let fee = parseFloat(res.repair.labor_fee) || 0;
@@ -690,6 +691,18 @@ $(document).ready(function() {
                                 'content'),
                         },
                         success: function(res) {
+                            if (sale_id != null) {
+                                Swal.fire({
+                                    title: "Sale Complete",
+                                    text: "Invoice is " + res
+                                        .invoice_no,
+                                    icon: "success",
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        location.reload();
+                                    }
+                                });
+                            }
                             Swal.fire({
                                 title: "Repair Status Updated",
                                 text: "Repair has been " +
@@ -702,6 +715,7 @@ $(document).ready(function() {
                                     location.reload();
                                 }
                             });
+
                         }
                     })
                 });

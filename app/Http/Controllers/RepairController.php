@@ -252,7 +252,7 @@ class RepairController extends Controller
 
                 $invoice = "TL-" . $year . "-". str_pad($nextNumber, 5, "0", STR_PAD_LEFT);
 
-                $overAllAmount = $totalAmount + $labor_fee;
+                $overAllAmount = $totalAmount;
                 $overAllProft = $totalProfit + $labor_fee;
 
                 $sale->update([
