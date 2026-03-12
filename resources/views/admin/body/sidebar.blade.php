@@ -50,13 +50,6 @@
                     </div>
                     Restock
                 </a>
-                <a class="nav-link button-hover {{ request()->routeIs('movements.*') ? 'active' : '' }}"
-                    href="{{ route('movements.index') }}">
-                    <div class="sb-nav-link-icon">
-                        <i class="fas fa-exchange-alt"></i>
-                    </div>
-                    Stock Movements
-                </a>
                 <!-- SALES/RETURNS -->
                 <div class="sb-sidenav-menu-heading">Sales</div>
                 <a class="nav-link button-hover {{ request()->routeIs('sales.*') ? 'active' : '' }}"

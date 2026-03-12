@@ -114,23 +114,6 @@ class StocksController extends Controller
             }
     }
 
-    public function StockMovementsIndex(){
-        $stockMove = StockMovements::select(
-            'stock_movements.*',
-            'products.name',
-            DB::raw("CASE 
-                                WHEN stock_movements.type = 'sale' THEN sales.invoice_no 
-                                WHEN stock_movements.type = 'restock' THEN restocks.reference_no 
-                                ELSE 'Invalid' 
-                            END AS reference_no")
-        )
-        ->leftJoin('products', 'products.id', '=', 'stock_movements.product_id')
-        ->leftJoin('sales', 'sales.id', '=', 'stock_movements.reference_id')
-        ->leftJoin('restocks', 'restocks.id', '=', 'stock_movements.reference_id')
-        ->get();
-        return view('backend.stock_movements', compact('stockMove'));
-    }
-
     public function GenerateDateRangeStockMovements(Request $request){
         $fromDate = $request->fromDate;
         $toDate = $request->toDate;

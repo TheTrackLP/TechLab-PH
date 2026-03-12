@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Sales;
 use App\Models\Products;
 use App\Models\salesItem;
+use App\Models\StockMovements;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
@@ -42,6 +43,23 @@ class ReportsController extends Controller
         ->join('products', 'products.id', '=', 'sales_items.product_id')
         ->groupBy('sales_items.product_id')
         ->get();
+
+        $stockMove = StockMovements::select(
+            'stock_movements.*',
+            'products.name',
+            DB::raw("CASE 
+                                WHEN stock_movements.type = 'sale' THEN sales.invoice_no 
+                                WHEN stock_movements.type = 'restock' THEN restocks.reference_no 
+                                WHEN stock_movements.type = 'return' THEN returns.return_no 
+                                ELSE 'Invalid' 
+                            END AS reference_no")
+        )
+        ->leftJoin('products', 'products.id', '=', 'stock_movements.product_id')
+        ->leftJoin('sales', 'sales.id', '=', 'stock_movements.reference_id')
+        ->leftJoin('restocks', 'restocks.id', '=', 'stock_movements.reference_id')
+        ->leftJoin('returns', 'returns.id', '=', 'stock_movements.reference_id')
+        ->get();
+
         return view('backend.reports', compact(
             'totalRevenue', 
             'totalProfit', 
@@ -49,7 +67,9 @@ class ReportsController extends Controller
             'list_low_stocks', 
             'today_sales', 
             'all_sales',
-            'product_sale'));
+            'product_sale',
+            'stockMove'
+            ));
     }
 
     public function ViewInvoice($id){

@@ -5,6 +5,7 @@
 $low_table = 1;
 $prod_table = 1;
 $date_table = 1;
+$stockMovenum = 1;
 @endphp
 <div class="container-fluid px-4">
     <h1 class="mt-4 mb-4">Reports Module</h1>
@@ -68,122 +69,299 @@ $date_table = 1;
             </div>
         </div>
     </div>
-    <!--  INVOICE REPORT -->
-    <h5 class="mb-3">Date Range Report</h5>
-    <div class="card shadow-sm mb-5">
-        <div class="card-body">
-            <!-- Table -->
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle" id="dataRangeTable">
-                    <thead class="table-dark text-center">
-                        <tr>
-                            <th class="text-center">#</th>
-                            <th class="text-center">Invoice</th>
-                            <th class="text-center">Date</th>
-                            <th class="text-center">Total</th>
-                            <th class="text-center">Profit</th>
-                            <th class="text-center">Payment</th>
-                            <th class="text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($all_sales as $sale)
-                        <tr>
-                            <td class="text-center">{{ $date_table++ }}</td>
-                            <td>{{ $sale->invoice_no }}</td>
-                            <td class="text-center">{{ date('M d, Y', strtotime($sale->completed_at)) }}</td>
-                            <td class="text-end">₱ {{ number_format($sale->total_amount, 2) }}</td>
-                            <td class="text-end text-success">₱ {{ number_format($sale->total_profit, 2) }}</td>
-                            <td class="text-center"><span class="badge bg-primary">{{ $sale->payment_type }}</span>
-                            </td>
-                            <td class="text-center align-middle">
-                                <button type="button" class="btn btn-info text-white" id="openInvoiceModal"
-                                    value="{{ $sale->id }}"><i class="fa-solid fa-eye"></i></button>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+    <ul class="nav nav-pills mb-3 nav-fill fw-bold justify-content-center" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill"
+                data-bs-target="#pills-sale-report" type="button" role="tab" aria-controls="pills-home"
+                aria-selected="true">Sales Report</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-return-report"
+                type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Returns Report</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-repair-report"
+                type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Repair Report</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill"
+                data-bs-target="#pills-inventory-report" type="button" role="tab" aria-controls="pills-contact"
+                aria-selected="false">Inventory Report</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-stock-report"
+                type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Stock Movement
+                Report</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill"
+                data-bs-target="#pills-lowstock-report" type="button" role="tab" aria-controls="pills-contact"
+                aria-selected="false">Low Stock Report</button>
+        </li>
+    </ul>
+    <div class="tab-content" id="pills-tabContent">
+        <div class="tab-pane fade show active" id="pills-sale-report" role="tabpanel" aria-labelledby="pills-home-tab"
+            tabindex="0">
+            <div class="card shadow-sm mb-5">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Invoice Report</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle" id="dataRangeTable">
+                            <thead class="table-dark text-center">
+                                <tr>
+                                    <th class="text-center">#</th>
+                                    <th class="text-center">Invoice</th>
+                                    <th class="text-center">Date</th>
+                                    <th class="text-center">Total</th>
+                                    <th class="text-center">Profit</th>
+                                    <th class="text-center">Payment</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($all_sales as $sale)
+                                <tr>
+                                    <td class="text-center">{{ $date_table++ }}</td>
+                                    <td>{{ $sale->invoice_no }}</td>
+                                    <td class="text-center">{{ date('M d, Y', strtotime($sale->completed_at)) }}</td>
+                                    <td class="text-end">₱ {{ number_format($sale->total_amount, 2) }}</td>
+                                    <td class="text-end text-success">₱ {{ number_format($sale->total_profit, 2) }}</td>
+                                    <td class="text-center"><span
+                                            class="badge bg-primary">{{ $sale->payment_type }}</span>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <button type="button" class="btn btn-info text-white" id="openInvoiceModal"
+                                            value="{{ $sale->id }}"><i class="fa-solid fa-eye"></i></button>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    <!-- PRODUCT SALES REPORT -->
-    <h5 class="mb-3">Product Sales Report</h5>
-    <div class="card shadow-sm mb-5">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle Datables">
-                    <thead class="table-dark text-center">
-                        <tr>
-                            <th class="text-center">#</th>
-                            <th class="text-center">Product</th>
-                            <th class="text-center">Quantity Sold</th>
-                            <th class="text-center">Total Revenue</th>
-                            <th class="text-center">Total Profit</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($product_sale as $data)
-                        <tr>
-                            <td class="text-center">{{ $prod_table++ }}</td>
-                            <td>{{ $data->name }}</td>
-                            <td class="text-center">{{ $data->total_sold }}</td>
-                            <td class="text-end">₱ {{ number_format($data->total_amount, 2) }}</td>
-                            <td class="text-end text-success">₱ {{ number_format($data->total_profit, 2) }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+        <div class="tab-pane fade" id="pills-return-report" role="tabpanel" aria-labelledby="pills-profile-tab"
+            tabindex="0">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Returns Report</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped align-middle Datables">
+                            <thead class="table-dark text-center">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Return No</th>
+                                    <th>Invoice No</th>
+                                    <th>Product</th>
+                                    <th>Qty</th>
+                                    <th>Refund Amount</th>
+                                    <th>Reason</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center">1</td>
+                                    <td>RT-2026-00001</td>
+                                    <td>TL-2026-00010</td>
+                                    <td>Logitech G102 Mouse</td>
+                                    <td class="text-center">1</td>
+                                    <td class="text-end">₱ 800.00</td>
+                                    <td>Defective Item</td>
+                                    <td class="text-center">2026-03-10</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-    <!-- LOW STOCK REPORT -->
-    <h5 class="mb-3">Low Stock Report</h5>
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0">Low Stock Report</h5>
-                <a class="btn btn-sm btn-outline-dark px-5" href="{{ route('generate.lowStocks') }}">
-                    <i class="fa-solid fa-print me-1"></i> Print
-                </a>
+        <div class="tab-pane fade" id="pills-repair-report" role="tabpanel" aria-labelledby="pills-contact-tab"
+            tabindex="0">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Repair Report</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped align-middle Datables">
+                            <thead class="table-dark text-center">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Repair No</th>
+                                    <th>Customer</th>
+                                    <th>Device</th>
+                                    <th>Labor Fee</th>
+                                    <th>Parts Amount</th>
+                                    <th>Total Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-center">1</td>
+                                    <td>RP-2026-00001</td>
+                                    <td>Juan Dela Cruz</td>
+                                    <td>Gaming PC</td>
+                                    <td class="text-end">₱ 500.00</td>
+                                    <td class="text-end">₱ 2,500.00</td>
+                                    <td class="text-end fw-bold">₱ 3,000.00</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-success">Completed</span>
+                                    </td>
+                                    <td class="text-center">2026-03-10</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle Datables">
-                    <thead class="table-dark text-center">
-                        <tr>
-                            <th class="text-center">#</th>
-                            <th class="text-center">Product</th>
-                            <th class="text-center">Current Stock</th>
-                            <th class="text-center">Minimum Stock</th>
-                            <th class="text-center">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($list_low_stocks as $low)
-                        <tr>
-                            <td class="text-center">{{ $low_table++ }}</td>
-                            <td>
-                                <div class="d-flex align-items-center gap-3">
-                                    <div>
-                                        <div class="fw-semibold">{{ $low->name }}</div>
-                                        <small class="text-muted">{{ $low->category_name }} • SKU:
-                                            {{ $low->sku }}</small>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="text-center">{{ $low->stock_quantity }}</td>
-                            <td class="text-center">{{ $low->minimum_stock }}</td>
-                            <td class="text-center">
-                                @if($low->stock_quantity == 0)
-                                <span class="badge bg-danger">Out of Stock</span>
-                                @else
-                                <span class="badge bg-warning text-dark">Low Stock</span>
-                                @endif
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+        </div>
+        <div class="tab-pane fade" id="pills-inventory-report" role="tabpanel" aria-labelledby="pills-contact-tab"
+            tabindex="0">
+            <div class="card shadow-sm mb-5">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Product Sales Report</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle Datables">
+                            <thead class="table-dark text-center">
+                                <tr>
+                                    <th class="text-center">#</th>
+                                    <th class="text-center">Product</th>
+                                    <th class="text-center">Quantity Sold</th>
+                                    <th class="text-center">Total Revenue</th>
+                                    <th class="text-center">Total Profit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($product_sale as $data)
+                                <tr>
+                                    <td class="text-center">{{ $prod_table++ }}</td>
+                                    <td>{{ $data->name }}</td>
+                                    <td class="text-center">{{ $data->total_sold }}</td>
+                                    <td class="text-end">₱ {{ number_format($data->total_amount, 2) }}</td>
+                                    <td class="text-end text-success">₱ {{ number_format($data->total_profit, 2) }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="pills-stock-report" role="tabpanel" aria-labelledby="pills-contact-tab"
+            tabindex="0">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Stock Movements Report</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle text-center Datables">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="text-center">#</th>
+                                    <th class="text-center">Date</th>
+                                    <th class="text-start">Product</th>
+                                    <th class="text-center">Type</th>
+                                    <th class="text-center">Qty</th>
+                                    <th class="text-center">Reference</th>
+                                    <th class="text-center">Created By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($stockMove as $move)
+                                <tr>
+                                    <td>{{ $stockMovenum++ }}</td>
+                                    <td>{{ date('M d, Y', strtotime($move->created_at)) }}</td>
+                                    <td class="text-start">{{ $move->name }}</td>
+                                    <td>
+                                        @if($move->type == 'sale')
+                                        <span class="badge bg-danger">Sale</span>
+                                        @elseif($move->type == 'restock')
+                                        <span class="badge bg-success">Restock</span>
+                                        @elseif($move->type == 'adjustment')
+                                        <span class="badge bg-warning">Adjustment</span>
+                                        @elseif($move->type == 'return')
+                                        <span class="badge bg-primary">Return</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        @if($move->type == 'sale')
+                                        <span class="text-danger fw-bold">{{ $move->quantity }}</span>
+                                        @else
+                                        <span class="text-success fw-bold">{{ $move->quantity }}</span>
+                                        @endif
+                                    </td>
+                                    <td>Reference:
+                                        <span class="fw-bold">{{ $move->reference_no }}</span>
+                                    </td>
+                                    <td>Admin</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="pills-lowstock-report" role="tabpanel" aria-labelledby="pills-contact-tab"
+            tabindex="0">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Low Stock Report</h5>
+                        <a class="btn btn-sm btn-outline-dark px-5" href="{{ route('generate.lowStocks') }}">
+                            <i class="fa-solid fa-print me-1"></i> Print
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle Datables">
+                            <thead class="table-dark text-center">
+                                <tr>
+                                    <th class="text-center">#</th>
+                                    <th class="text-center">Product</th>
+                                    <th class="text-center">Current Stock</th>
+                                    <th class="text-center">Minimum Stock</th>
+                                    <th class="text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($list_low_stocks as $low)
+                                <tr>
+                                    <td class="text-center">{{ $low_table++ }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div>
+                                                <div class="fw-semibold">{{ $low->name }}</div>
+                                                <small class="text-muted">{{ $low->category_name }} • SKU:
+                                                    {{ $low->sku }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">{{ $low->stock_quantity }}</td>
+                                    <td class="text-center">{{ $low->minimum_stock }}</td>
+                                    <td class="text-center">
+                                        @if($low->stock_quantity == 0)
+                                        <span class="badge bg-danger">Out of Stock</span>
+                                        @else
+                                        <span class="badge bg-warning text-dark">Low Stock</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
