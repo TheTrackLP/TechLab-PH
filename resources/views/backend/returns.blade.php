@@ -182,6 +182,9 @@ $(document).ready(function() {
                     });
 
                     if (returnItemQTY > 0) {
+                        let subTotal = returnItemPrice * returnItemQTY;
+                        totalReturnAmount += subTotal;
+
                         returnItems.push({
                             product_id: returnItemID,
                             name: returnItemName,
@@ -189,8 +192,6 @@ $(document).ready(function() {
                             quantity: returnItemQTY
                         });
                     }
-                    let subTotal = returnItemPrice * returnItemQTY;
-                    totalReturnAmount += subTotal;
 
                     $("#returnTotalAmount").text(
                         totalReturnAmount.toLocaleString(
