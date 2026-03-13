@@ -65,6 +65,7 @@ Route::middleware('auth')->group(function(){
     Route::controller(ReportsController::class)->group(function(){
         Route::get('/admin/reports', 'ReportsIndex')->name('reports.index'); 
         Route::get('/admin/reports/view-invoice/{id}', 'ViewInvoice'); 
+        Route::get('/admin/reports/view-return/{id}', 'ViewRetuns'); 
         // Route::get('/admin/reports/print-invoice', 'PrintInvoice')->name('print.invoice'); 
         Route::get('/admin/reports/print/invoice/date-range', 'GenerateDateRangeInvoice')->name('dateRange.invoice'); 
         Route::get('/admin/reports/print/product-sale/date-range', 'GenerateDateRangeProductSale')->name('dateRange.productSale'); 

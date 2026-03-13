@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ReturnItems;
 use App\Models\Sales;
 use App\Models\Products;
+use App\Models\Returns;
 use App\Models\salesItem;
 use App\Models\StockMovements;
 use Illuminate\Support\Facades\DB;
@@ -60,6 +62,15 @@ class ReportsController extends Controller
         ->leftJoin('returns', 'returns.id', '=', 'stock_movements.reference_id')
         ->get();
 
+        $returns = Returns::select(
+            'returns.*',
+            'sales.invoice_no'
+            )
+        ->join("sales", "sales.id", "returns.sale_id")
+        ->join("return_items", "return_items.id", "returns.id")
+        ->orderBy('returns.id', 'desc')
+        ->get();
+
         return view('backend.reports', compact(
             'totalRevenue', 
             'totalProfit', 
@@ -68,7 +79,8 @@ class ReportsController extends Controller
             'today_sales', 
             'all_sales',
             'product_sale',
-            'stockMove'
+            'stockMove',
+            'returns'
             ));
     }
 
@@ -87,6 +99,35 @@ class ReportsController extends Controller
         return response()->json([
             'invoice'=>$invoice,
             'items'=>$items,
+        ]);
+    }
+
+    public function ViewRetuns($id){
+        $return = Returns::select(
+            'returns.*',
+            'sales.invoice_no',
+            DB::raw("count(return_items.return_id) as total_items"),
+            )
+        ->join('sales', 'sales.id', '=', 'returns.sale_id')
+        ->join('return_items', 'return_items.return_id', '=', 'returns.id')
+        ->where('returns.id', $id)
+        ->groupBy('return_items.return_id')
+        ->first();
+
+        $return_items = ReturnItems::select(
+            'return_items.*',
+            'returns.*',
+            'products.name',
+        )
+        ->leftJoin('returns', 'returns.id', '=', 'return_items.return_id')
+        ->leftJoin('products', 'products.id', '=', 'return_items.product_id')
+        ->where('return_items.return_id', $return->id)
+        ->groupBy('return_items.id')
+        ->get();
+
+        return response()->json([
+            'return_info'=>$return,
+            'return_items'=>$return_items
         ]);
     }
 

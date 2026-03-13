@@ -6,6 +6,7 @@ $low_table = 1;
 $prod_table = 1;
 $date_table = 1;
 $stockMovenum = 1;
+$returnNum = 1;
 @endphp
 <div class="container-fluid px-4">
     <h1 class="mt-4 mb-4">Reports Module</h1>
@@ -25,18 +26,24 @@ $stockMovenum = 1;
                     <label class="form-label">To Date</label>
                     <input type="date" name="toDate" id="toDate" class="form-control">
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-3">
+                    <label class="form-label">Report Type</label>
+                    <select class="select2" id="reportType">
+                        <option></option>
+                        <option value="sales">Sales Report</option>
+                        <option value="returns">Returns Report</option>
+                        <option value="repairs">Repair Report</option>
+                        <option value="inventory">Inventory Report</option>
+                        <option value="stock_movements">Stock Movement Report</option>
+                        <option value="low_stock">Low Stock Report</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
                     <label class="form-label d-block invisible">Actions</label>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-outline-dark w-100" onclick="GenerateDateRangeInvoice()">
-                            <i class="fa-solid fa-file-invoice me-1"></i>
-                            Invoice Report
-                        </button>
-                        <button class="btn btn-dark w-100" onclick="GenerateDateRangeProductSale()">
-                            <i class="fa-solid fa-chart-column me-1"></i>
-                            Product Sales
-                        </button>
-                    </div>
+                    <button class="btn btn-dark w-100" onclick="GenerateDateRangeInvoice()">
+                        <i class="fa-solid fa-chart-column me-1"></i>
+                        Product Sales
+                    </button>
                 </div>
             </div>
         </div>
@@ -73,7 +80,12 @@ $stockMovenum = 1;
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill"
                 data-bs-target="#pills-sale-report" type="button" role="tab" aria-controls="pills-home"
-                aria-selected="true">Sales Report</button>
+                aria-selected="true">Invoice Report</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill"
+                data-bs-target="#pills-product-sale-report" type="button" role="tab" aria-controls="pills-contact"
+                aria-selected="false">Product Sale Report</button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-return-report"
@@ -84,9 +96,8 @@ $stockMovenum = 1;
                 type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Repair Report</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill"
-                data-bs-target="#pills-inventory-report" type="button" role="tab" aria-controls="pills-contact"
-                aria-selected="false">Inventory Report</button>
+            <button class="nav-link" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-inventory-report"
+                type="button" role="tab" aria-controls="pills-home" aria-selected="false">Inventory Report</button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-stock-report"
@@ -100,6 +111,7 @@ $stockMovenum = 1;
         </li>
     </ul>
     <div class="tab-content" id="pills-tabContent">
+        <!-- Invoice Report -->
         <div class="tab-pane fade show active" id="pills-sale-report" role="tabpanel" aria-labelledby="pills-home-tab"
             tabindex="0">
             <div class="card shadow-sm mb-5">
@@ -143,6 +155,42 @@ $stockMovenum = 1;
                 </div>
             </div>
         </div>
+        <!-- Product Sales Report -->
+        <div class="tab-pane fade" id="pills-product-sale-report" role="tabpanel" aria-labelledby="pills-contact-tab"
+            tabindex="0">
+            <div class="card shadow-sm mb-5">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Product Sales Report</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle Datables">
+                            <thead class="table-dark text-center">
+                                <tr>
+                                    <th class="text-center">#</th>
+                                    <th class="text-center">Product</th>
+                                    <th class="text-center">Quantity Sold</th>
+                                    <th class="text-center">Total Revenue</th>
+                                    <th class="text-center">Total Profit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($product_sale as $data)
+                                <tr>
+                                    <td class="text-center">{{ $prod_table++ }}</td>
+                                    <td>{{ $data->name }}</td>
+                                    <td class="text-center">{{ $data->total_sold }}</td>
+                                    <td class="text-end">₱ {{ number_format($data->total_amount, 2) }}</td>
+                                    <td class="text-end text-success">₱ {{ number_format($data->total_profit, 2) }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Return Report -->
         <div class="tab-pane fade" id="pills-return-report" role="tabpanel" aria-labelledby="pills-profile-tab"
             tabindex="0">
             <div class="card shadow-sm">
@@ -151,36 +199,46 @@ $stockMovenum = 1;
                         <h5 class="mb-0">Returns Report</h5>
                     </div>
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped align-middle Datables">
-                            <thead class="table-dark text-center">
+                        <table class="table table-bordered table-hover align-middle Datables">
+                            <thead class="table-dark">
                                 <tr>
-                                    <th>#</th>
-                                    <th>Return No</th>
-                                    <th>Invoice No</th>
-                                    <th>Product</th>
-                                    <th>Qty</th>
-                                    <th>Refund Amount</th>
-                                    <th>Reason</th>
-                                    <th>Date</th>
+                                    <th class="text-center">#</th>
+                                    <th class="text-center">Return No</th>
+                                    <th class="text-center">Invoice No</th>
+                                    <th class="text-center">Refund Amount</th>
+                                    <th class="text-center">Reason</th>
+                                    <th class="text-center">Date</th>
+                                    <th class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                @foreach ($returns as $data)
                                 <tr>
-                                    <td class="text-center">1</td>
-                                    <td>RT-2026-00001</td>
-                                    <td>TL-2026-00010</td>
-                                    <td>Logitech G102 Mouse</td>
-                                    <td class="text-center">1</td>
-                                    <td class="text-end">₱ 800.00</td>
-                                    <td>Defective Item</td>
-                                    <td class="text-center">2026-03-10</td>
+                                    <td class="text-center">{{ $returnNum++ }}</td>
+                                    <td class="text-center">{{ $data->return_no }}</td>
+                                    <td class="text-center">{{ $data->invoice_no }}</td>
+                                    <td class="text-center">₱{{ number_format($data->total_amount, 2) }}</td>
+                                    <td class="text-center">
+                                        @php
+                                        $reason = str_replace("_", " ", $data->reason)
+                                        @endphp
+                                        {{ ucwords($reason) }}
+                                    </td>
+                                    <td class="text-center">{{ date('M d, Y', strtotime($data->created_at)) }}</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-info text-white" value="{{ $data->id }}"
+                                            id="openReturnModal">
+                                            <i class="fa-solid fa-eye"></i> </button>
+                                    </td>
                                 </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- Repair Report -->
         <div class="tab-pane fade" id="pills-repair-report" role="tabpanel" aria-labelledby="pills-contact-tab"
             tabindex="0">
             <div class="card shadow-sm">
@@ -223,40 +281,121 @@ $stockMovenum = 1;
                 </div>
             </div>
         </div>
-        <div class="tab-pane fade" id="pills-inventory-report" role="tabpanel" aria-labelledby="pills-contact-tab"
+        <!-- Inventory Report -->
+        <div class="tab-pane fade" id="pills-inventory-report" role="tabpanel" aria-labelledby="pills-home-tab"
             tabindex="0">
-            <div class="card shadow-sm mb-5">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="mb-0">Product Sales Report</h5>
+            <div class="container mt-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">Inventory Report</h5>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover align-middle Datables">
-                            <thead class="table-dark text-center">
-                                <tr>
-                                    <th class="text-center">#</th>
-                                    <th class="text-center">Product</th>
-                                    <th class="text-center">Quantity Sold</th>
-                                    <th class="text-center">Total Revenue</th>
-                                    <th class="text-center">Total Profit</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($product_sale as $data)
-                                <tr>
-                                    <td class="text-center">{{ $prod_table++ }}</td>
-                                    <td>{{ $data->name }}</td>
-                                    <td class="text-center">{{ $data->total_sold }}</td>
-                                    <td class="text-end">₱ {{ number_format($data->total_amount, 2) }}</td>
-                                    <td class="text-end text-success">₱ {{ number_format($data->total_profit, 2) }}</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+
+                    <div class="card-body">
+                        <!-- Summary Section -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="border rounded p-3">
+                                    <strong>Total Products:</strong> 120
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="border rounded p-3">
+                                    <strong>Total Inventory Value:</strong> ₱ 245,500.00
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 text-end">
+                                <button class="btn btn-outline-dark">
+                                    <i class="fa-solid fa-print"></i> Print Report
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Inventory Table -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped align-middle">
+
+                                <thead class="table-dark text-center">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Product</th>
+                                        <th>SKU</th>
+                                        <th>Category</th>
+                                        <th>Stock Qty</th>
+                                        <th>Minimum Stock</th>
+                                        <th>Cost Price</th>
+                                        <th>Stock Value</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                    <tr>
+                                        <td class="text-center">1</td>
+                                        <td>Ryzen 5 5600</td>
+                                        <td>CPU-R5600</td>
+                                        <td>Processors</td>
+                                        <td class="text-center">12</td>
+                                        <td class="text-center">5</td>
+                                        <td class="text-end">₱ 7,500.00</td>
+                                        <td class="text-end">₱ 90,000.00</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success">Normal</span>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="text-center">2</td>
+                                        <td>Logitech G102 Mouse</td>
+                                        <td>MSE-001</td>
+                                        <td>Mouse</td>
+                                        <td class="text-center">3</td>
+                                        <td class="text-center">5</td>
+                                        <td class="text-end">₱ 500.00</td>
+                                        <td class="text-end">₱ 1,500.00</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-warning text-dark">Low Stock</span>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="text-center">3</td>
+                                        <td>Brother Ink Black</td>
+                                        <td>INK-B001</td>
+                                        <td>Printer Ink</td>
+                                        <td class="text-center">0</td>
+                                        <td class="text-center">5</td>
+                                        <td class="text-end">₱ 250.00</td>
+                                        <td class="text-end">₱ 0.00</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-danger">Out of Stock</span>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="text-center">4</td>
+                                        <td>Kingston 8GB DDR4</td>
+                                        <td>RAM-K8GB</td>
+                                        <td>RAM</td>
+                                        <td class="text-center">20</td>
+                                        <td class="text-center">5</td>
+                                        <td class="text-end">₱ 900.00</td>
+                                        <td class="text-end">₱ 18,000.00</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success">Normal</span>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- Stock Movements Report -->
         <div class="tab-pane fade" id="pills-stock-report" role="tabpanel" aria-labelledby="pills-contact-tab"
             tabindex="0">
             <div class="card shadow-sm">
@@ -313,6 +452,7 @@ $stockMovenum = 1;
                 </div>
             </div>
         </div>
+        <!-- Low Stock Report -->
         <div class="tab-pane fade" id="pills-lowstock-report" role="tabpanel" aria-labelledby="pills-contact-tab"
             tabindex="0">
             <div class="card shadow-sm">
@@ -452,27 +592,106 @@ $stockMovenum = 1;
     </div>
 </div>
 
-<script>
-function GenerateDateRangeInvoice() {
-    const fromDate = document.getElementById('fromDate').value;
-    const toDate = document.getElementById('toDate').value;
-    if (!fromDate || !toDate) {
-        toastr.error("Error, Both Date are empty!");
-        return;
-    }
-    const url = `{{ route('dateRange.invoice') }}?fromDate=${fromDate}&toDate=${toDate}`;
-    printNewWindow(url);
-}
+<!-- Return Preview Modal -->
+<div class="modal fade" id="viewReturnModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-rotate-left me-2"></i>
+                    Return Details
+                </h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="mb-1 fw-bold">Return No: <span id="return_no"></span></h5>
+                        <small class="text-muted">Linked Invoice: <span id="invoice_no"></span></small>
+                    </div>
+                    <span class="badge bg-danger fs-6">
+                        Returned
+                    </span>
+                </div>
+                <hr>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 bg-light">
+                            <small class="text-muted">Return Date</small>
+                            <div class="fw-semibold"><span id="return_date"></span></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 bg-light">
+                            <small class="text-muted">Reason</small>
+                            <div class="fw-semibold"><span id="return_reason"></span></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 bg-light">
+                            <small class="text-muted">Processed By</small>
+                            <div class="fw-semibold">null</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle">
+                        <thead class="table-light text-center">
+                            <tr>
+                                <th width="5%">#</th>
+                                <th class="text-start">Product</th>
+                                <th width="10%">Qty</th>
+                                <th width="15%">Unit Price</th>
+                                <th width="15%">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="returnTable">
 
-function GenerateDateRangeProductSale() {
+                        </tbody>
+                    </table>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 bg-light">
+                            <strong>Return Notes</strong>
+                            <p class="mb-0 text-muted" id="return_notes">.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 text-end">
+                            <div class="mb-1">
+                                <strong>Total Items:</strong> <span id="totalItems"></span>
+                            </div>
+                            <div class="fs-5">
+                                <strong>Total Refund:</strong>
+                                <span class="fw-bold text-danger" id="totalAmount"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function GenerateDateRangeReports() {
     const fromDate = document.getElementById('fromDate').value;
     const toDate = document.getElementById('toDate').value;
-    if (!fromDate || !toDate) {
+    const reportType = document.getElementById('reportType').value;
+    if (!fromDate || !toDate && reportType) {
         toastr.error("Error, Both Date are empty!");
         return;
     }
-    const url = `{{ route('dateRange.productSale') }}?fromDate=${fromDate}&toDate=${toDate}`;
-    printNewWindow(url);
+    console.log(fromDate);
+    console.log(toDate);
+    console.log(reportType);
+
 }
 
 function printNewWindow(url) {
@@ -487,6 +706,62 @@ $(document).ready(function() {
         // window.open(url, '_blank');
     }
 
+    $(document).on('click', '#openReturnModal', function() {
+        $("#viewReturnModal").modal('show');
+        var return_id = $(this).val();
+
+        $.ajax({
+            type: "GET",
+            url: '/admin/reports/view-return/' + return_id,
+            success: function(res) {
+                console.log(res);
+                let rawDate = res.return_info.created_at;
+                let reason = res.return_info.reason;
+                let totalAmount = res.return_info.total_amount;
+
+                let formattedReason = reason.replaceAll("_", " ");
+                // Convert to valid Date object
+                let formattedDate = new Date(rawDate.replace(' ', 'T'));
+
+                let format_date = formattedDate.toLocaleString('en-PH', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                });
+                //Display Info
+                $("#return_no").text(res.return_info.return_no);
+                $("#invoice_no").text(res.return_info.invoice_no);
+                $("#return_date").text(format_date);
+                $("#return_reason").text(formattedReason);
+                $("#return_notes").text(res.return_info.notes);
+                $("#totalItems").text(res.return_info.total_items);
+                $("#totalAmount").text(
+                    totalAmount.toLocaleString('en-PH', {
+                        style: 'currency',
+                        currency: 'PHP'
+                    })
+                );
+
+                let returnTable = $("#returnTable");
+                returnTable.empty();
+
+                $.each(res.return_items, function(key, item) {
+                    returnTable.append(`
+                    <tr>
+                        <td class="text-center">${key + 1}</td>
+                        <td class="text-start">${item.name}</td>
+                        <td class="text-center">${item.quantity}</td>
+                        <td class="text-end">₱${item.selling_price_snapshot.toLocaleString('en-PH')}</td>
+                        <td class="text-end">₱${item.subtotal.toLocaleString('en-PH')}</td>
+                    </tr>
+                    `)
+                });
+            }
+        });
+    });
 
     $(document).on('click', '#openInvoiceModal', function() {
         var invoice_id = $(this).val();
@@ -497,8 +772,6 @@ $(document).ready(function() {
             type: "GET",
             url: "/admin/reports/view-invoice/" + invoice_id,
             success: function(res) {
-                console.log(res);
-
                 $("#invoice_no").text(res.invoice.invoice_no);
                 let rawDate = res.invoice.completed_at;
                 // Convert to valid Date object
