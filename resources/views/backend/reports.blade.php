@@ -7,6 +7,7 @@ $prod_table = 1;
 $date_table = 1;
 $stockMovenum = 1;
 $returnNum = 1;
+$repairNum = 1;
 @endphp
 <div class="container-fluid px-4">
     <h1 class="mt-4 mb-4">Reports Module</h1>
@@ -250,31 +251,57 @@ $returnNum = 1;
                         <table class="table table-bordered table-striped align-middle Datables">
                             <thead class="table-dark text-center">
                                 <tr>
-                                    <th>#</th>
-                                    <th>Repair No</th>
-                                    <th>Customer</th>
-                                    <th>Device</th>
-                                    <th>Labor Fee</th>
-                                    <th>Parts Amount</th>
-                                    <th>Total Amount</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
+                                    <th class="text-center">#</th>
+                                    <th class="text-center">Repair No</th>
+                                    <th class="text-center">Customer</th>
+                                    <th class="text-center">Device</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Invoice</th>
+                                    <th class="text-center">Total Amount</th>
+                                    <th class="text-center">Date</th>
+                                    <th class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                @foreach ($repairs as $repair)
                                 <tr>
-                                    <td class="text-center">1</td>
-                                    <td>RP-2026-00001</td>
-                                    <td>Juan Dela Cruz</td>
-                                    <td>Gaming PC</td>
-                                    <td class="text-end">₱ 500.00</td>
-                                    <td class="text-end">₱ 2,500.00</td>
-                                    <td class="text-end fw-bold">₱ 3,000.00</td>
+                                    <td class="text-center">{{ $repairNum++ }}</td>
+                                    <td>{{ $repair->repair_no }}</td>
+                                    <td>{{ $repair->customer_name }}</td>
                                     <td class="text-center">
-                                        <span class="badge bg-success">Completed</span>
+                                        @php
+                                        $device_type = str_replace("_", " ", $repair->device_type);
+                                        @endphp
+                                        {{ ucwords($device_type) }}
                                     </td>
-                                    <td class="text-center">2026-03-10</td>
+                                    <td class="text-center">
+                                        @if ($repair->status == 'pending_diagnosis')
+                                        <span class="badge bg-secondary text-white">Pending Diagnosis</span>
+                                        @elseif ($repair->status == 'awaiting_approval')
+                                        <span class="badge bg-warning text-dark">Awaiting Approval</span>
+                                        @elseif ($repair->status == 'in_progress')
+                                        <span class="badge bg-primary">In Progress</span>
+                                        @elseif ($repair->status == 'completed')
+                                        <span class="badge bg-success">Completed</span>
+                                        @elseif ($repair->status == 'released')
+                                        <span class="badge bg-dark text-white">Released</span>
+                                        @elseif ($repair->status == 'cancelled')
+                                        <span class="badge bg-danger">Cancelled</span>
+                                        @elseif ($repair->status == 'abandoned')
+                                        <span class="badge bg-dark">Abandoned</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-end">{{ $repair->invoice_no }}</td>
+                                    <td class="text-end fw-bold">₱ {{ number_format($repair->total_amount, 2) }}</td>
+                                    <td class="text-center">{{ date('M d, Y', strtotime($repair->created_at)) }}</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-info text-white" value="{{ $repair->id }}"
+                                            id="openRepairModal">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </td>
                                 </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
@@ -679,6 +706,125 @@ $returnNum = 1;
     </div>
 </div>
 
+<!-- Repair Preview Modal -->
+<div class="modal fade" id="viewRepairModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-screwdriver-wrench me-2"></i>
+                    Repair Details
+                </h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-1">Repair No: <span id="repair_no"></span></h5>
+                        <div class="small text-muted">
+                            <div>Invoice: <span class="fw-semibold" id="repairSale_no"></span></div>
+                        </div>
+                    </div>
+                    <span class="badge bg-warning fs-6">
+                        In Progress
+                    </span>
+                </div>
+                <hr>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 bg-light">
+                            <small class="text-muted">Customer Name</small>
+                            <div class="fw-semibold" id="repairCustomerName"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 bg-light">
+                            <small class="text-muted">Device Type</small>
+                            <div class="fw-semibold" id="repairDevice_type"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 bg-light">
+                            <small class="text-muted">Date Received</small>
+                            <div class="fw-semibold" id="repairDateCreated"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="border rounded p-3 mb-4">
+                    <strong>Diagnosis</strong>
+                    <p class="mb-0 text-muted">
+                        Motherboard and PSU are fried due to power surge.
+                        Recommended replacement of PSU and motherboard.
+                    </p>
+                </div>
+                <h6 class="mb-3">Parts Used</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead class="table-light text-center">
+                            <tr>
+                                <th width="5%">#</th>
+                                <th class="text-start">Product</th>
+                                <th width="10%">Qty</th>
+                                <th width="15%">Unit Price</th>
+                                <th width="15%">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-center">1</td>
+                                <td class="text-start">Corsair 650W PSU</td>
+                                <td class="text-center">1</td>
+                                <td class="text-end">₱2,500</td>
+                                <td class="text-end">₱2,500</td>
+                            </tr>
+                            <tr>
+                                <td class="text-center">2</td>
+                                <td class="text-start">ASUS B450 Motherboard</td>
+                                <td class="text-center">1</td>
+                                <td class="text-end">₱4,000</td>
+                                <td class="text-end">₱4,000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 bg-light">
+                            <strong>Repair Notes</strong>
+                            <p class="text-muted mb-0">
+                                Customer approved replacement of damaged components.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3 text-end">
+                            <div class="mb-2">
+                                <strong>Labor Fee:</strong>
+                                <span>₱500</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Parts Total:</strong>
+                                <span>₱6,500</span>
+                            </div>
+                            <hr>
+                            <div class="fs-5">
+                                <strong>Total Amount:</strong>
+                                <span class="fw-bold text-success">₱7,000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function GenerateDateRangeReports() {
     const fromDate = document.getElementById('fromDate').value;
@@ -706,6 +852,27 @@ $(document).ready(function() {
         // window.open(url, '_blank');
     }
 
+    $(document).on('click', '#openRepairModal', function() {
+        $("#viewRepairModal").modal('show');
+        var repair_id = $(this).val();
+
+        $.ajax({
+            type: "GET",
+            url: "/admin/reports/view-repair/info/" + repair_id,
+            success: function(res) {
+                console.log(res);
+                let device_type = res.repair_info.device_type;
+                let formatDevice = device_type.replaceAll("_", " ");
+
+                $("#repair_no").text(res.repair_info.repair_no);
+                $("#repairSale_no").text(res.repair_info.invoice_no);
+                $("#repairDevice_type").text(formatDevice);
+                $("#repairCustomerName").text(res.repair_info.customer_name);
+                $("#repairDateCreated").text(res.repair_info.created_at);
+            }
+        });
+    });
+
     $(document).on('click', '#openReturnModal', function() {
         $("#viewReturnModal").modal('show');
         var return_id = $(this).val();
@@ -714,7 +881,6 @@ $(document).ready(function() {
             type: "GET",
             url: '/admin/reports/view-return/' + return_id,
             success: function(res) {
-                console.log(res);
                 let rawDate = res.return_info.created_at;
                 let reason = res.return_info.reason;
                 let totalAmount = res.return_info.total_amount;

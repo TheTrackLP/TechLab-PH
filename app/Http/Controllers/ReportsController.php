@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Repairs;
 use App\Models\ReturnItems;
 use App\Models\Sales;
 use App\Models\Products;
+use App\Models\RepairItems;
 use App\Models\Returns;
 use App\Models\salesItem;
 use App\Models\StockMovements;
@@ -66,9 +68,16 @@ class ReportsController extends Controller
             'returns.*',
             'sales.invoice_no'
             )
-        ->join("sales", "sales.id", "returns.sale_id")
-        ->join("return_items", "return_items.id", "returns.id")
+        ->leftJoin("sales", "sales.id", "returns.sale_id")
         ->orderBy('returns.id', 'desc')
+        ->get();
+
+        $repairs = Repairs::select(
+            'repairs.*',
+            'sales.invoice_no'
+            )
+        ->leftJoin("sales", "sales.id", "repairs.sale_id")
+        ->orderBy('repairs.id', 'desc')
         ->get();
 
         return view('backend.reports', compact(
@@ -80,11 +89,12 @@ class ReportsController extends Controller
             'all_sales',
             'product_sale',
             'stockMove',
-            'returns'
+            'returns',
+            'repairs'
             ));
     }
 
-    public function ViewInvoice($id){
+    public function ViewInvoiceInfo($id){
         $invoice = Sales::findOrFail($id);
 
         $items = salesItem::select(
@@ -102,7 +112,7 @@ class ReportsController extends Controller
         ]);
     }
 
-    public function ViewRetuns($id){
+    public function ViewRetunInfo($id){
         $return = Returns::select(
             'returns.*',
             'sales.invoice_no',
@@ -128,6 +138,19 @@ class ReportsController extends Controller
         return response()->json([
             'return_info'=>$return,
             'return_items'=>$return_items
+        ]);
+    }
+    public function ViewRepairInfo($id){
+        $repair_info = Repairs::select(
+            'repairs.*',
+            'sales.invoice_no',
+        )
+        ->leftJoin('sales', 'sales.id', 'repairs.sale_id')
+        ->where('repairs.id', $id)
+        ->first();
+
+        return response()->json([
+            'repair_info'=>$repair_info,
         ]);
     }
 
