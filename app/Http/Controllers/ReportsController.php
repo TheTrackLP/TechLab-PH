@@ -80,6 +80,13 @@ class ReportsController extends Controller
         ->orderBy('repairs.id', 'desc')
         ->get();
 
+        $inventories = Products::select(
+            'products.*',
+            'categories.category_name',
+        )
+        ->join("categories", "categories.id", "=", "products.category_id")
+        ->get();
+
         return view('backend.reports', compact(
             'totalRevenue', 
             'totalProfit', 
@@ -90,7 +97,8 @@ class ReportsController extends Controller
             'product_sale',
             'stockMove',
             'returns',
-            'repairs'
+            'repairs',
+            'inventories'
             ));
     }
 
@@ -149,8 +157,19 @@ class ReportsController extends Controller
         ->where('repairs.id', $id)
         ->first();
 
+        $repair_items = RepairItems::select(
+            'repair_items.*',
+            'repairs.*',
+            'products.name',
+        )
+        ->leftJoin("repairs", "repairs.id", "=", "repair_items.repair_id")
+        ->leftJoin('products', 'products.id', '=', 'repair_items.product_id')
+        ->where("repair_items.repair_id", $repair_info->id)
+        ->get();
+
         return response()->json([
             'repair_info'=>$repair_info,
+            'repair_items'=>$repair_items,
         ]);
     }
 

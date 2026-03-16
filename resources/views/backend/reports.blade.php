@@ -8,6 +8,7 @@ $date_table = 1;
 $stockMovenum = 1;
 $returnNum = 1;
 $repairNum = 1;
+$productNum = 1;
 @endphp
 <div class="container-fluid px-4">
     <h1 class="mt-4 mb-4">Reports Module</h1>
@@ -97,13 +98,13 @@ $repairNum = 1;
                 type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Repair Report</button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-inventory-report"
-                type="button" role="tab" aria-controls="pills-home" aria-selected="false">Inventory Report</button>
-        </li>
-        <li class="nav-item" role="presentation">
             <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-stock-report"
                 type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Stock Movement
                 Report</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-inventory-report"
+                type="button" role="tab" aria-controls="pills-home" aria-selected="false">Inventory Report</button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill"
@@ -308,120 +309,6 @@ $repairNum = 1;
                 </div>
             </div>
         </div>
-        <!-- Inventory Report -->
-        <div class="tab-pane fade" id="pills-inventory-report" role="tabpanel" aria-labelledby="pills-home-tab"
-            tabindex="0">
-            <div class="container mt-4">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-dark text-white">
-                        <h5 class="mb-0">Inventory Report</h5>
-                    </div>
-
-                    <div class="card-body">
-                        <!-- Summary Section -->
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <div class="border rounded p-3">
-                                    <strong>Total Products:</strong> 120
-                                </div>
-                            </div>
-
-                            <div class="col-md-4">
-                                <div class="border rounded p-3">
-                                    <strong>Total Inventory Value:</strong> ₱ 245,500.00
-                                </div>
-                            </div>
-
-                            <div class="col-md-4 text-end">
-                                <button class="btn btn-outline-dark">
-                                    <i class="fa-solid fa-print"></i> Print Report
-                                </button>
-                            </div>
-                        </div>
-                        <!-- Inventory Table -->
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-striped align-middle">
-
-                                <thead class="table-dark text-center">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Product</th>
-                                        <th>SKU</th>
-                                        <th>Category</th>
-                                        <th>Stock Qty</th>
-                                        <th>Minimum Stock</th>
-                                        <th>Cost Price</th>
-                                        <th>Stock Value</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-
-                                    <tr>
-                                        <td class="text-center">1</td>
-                                        <td>Ryzen 5 5600</td>
-                                        <td>CPU-R5600</td>
-                                        <td>Processors</td>
-                                        <td class="text-center">12</td>
-                                        <td class="text-center">5</td>
-                                        <td class="text-end">₱ 7,500.00</td>
-                                        <td class="text-end">₱ 90,000.00</td>
-                                        <td class="text-center">
-                                            <span class="badge bg-success">Normal</span>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td class="text-center">2</td>
-                                        <td>Logitech G102 Mouse</td>
-                                        <td>MSE-001</td>
-                                        <td>Mouse</td>
-                                        <td class="text-center">3</td>
-                                        <td class="text-center">5</td>
-                                        <td class="text-end">₱ 500.00</td>
-                                        <td class="text-end">₱ 1,500.00</td>
-                                        <td class="text-center">
-                                            <span class="badge bg-warning text-dark">Low Stock</span>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td class="text-center">3</td>
-                                        <td>Brother Ink Black</td>
-                                        <td>INK-B001</td>
-                                        <td>Printer Ink</td>
-                                        <td class="text-center">0</td>
-                                        <td class="text-center">5</td>
-                                        <td class="text-end">₱ 250.00</td>
-                                        <td class="text-end">₱ 0.00</td>
-                                        <td class="text-center">
-                                            <span class="badge bg-danger">Out of Stock</span>
-                                        </td>
-                                    </tr>
-
-                                    <tr>
-                                        <td class="text-center">4</td>
-                                        <td>Kingston 8GB DDR4</td>
-                                        <td>RAM-K8GB</td>
-                                        <td>RAM</td>
-                                        <td class="text-center">20</td>
-                                        <td class="text-center">5</td>
-                                        <td class="text-end">₱ 900.00</td>
-                                        <td class="text-end">₱ 18,000.00</td>
-                                        <td class="text-center">
-                                            <span class="badge bg-success">Normal</span>
-                                        </td>
-                                    </tr>
-
-                                </tbody>
-
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
         <!-- Stock Movements Report -->
         <div class="tab-pane fade" id="pills-stock-report" role="tabpanel" aria-labelledby="pills-contact-tab"
             tabindex="0">
@@ -471,6 +358,63 @@ $repairNum = 1;
                                         <span class="fw-bold">{{ $move->reference_no }}</span>
                                     </td>
                                     <td>Admin</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Inventory Report -->
+        <div class="tab-pane fade" id="pills-inventory-report" role="tabpanel" aria-labelledby="pills-home-tab"
+            tabindex="0">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Inventory Report</h5>
+                        <a class="btn btn-sm btn-outline-dark px-5" href="">
+                            <i class="fa-solid fa-print me-1"></i> Print
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped align-middle Datables">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="text-center">#</th>
+                                    <th class="text-center">Product</th>
+                                    <th class="text-center">SKU</th>
+                                    <th class="text-center">Category</th>
+                                    <th class="text-center">Stock Qty</th>
+                                    <th class="text-center">Minimum Stock</th>
+                                    <th class="text-center">Cost Price</th>
+                                    <th class="text-center">Selling Price</th>
+                                    <th class="text-center">Stock Value</th>
+                                    <th class="text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($inventories as $product)
+                                <tr>
+                                    <td class="text-center">{{ $productNum++ }}</td>
+                                    <td>{{ $product->name }}</td>
+                                    <td class="text-center">{{ $product->sku }}</td>
+                                    <td class="text-center">{{ $product->category_name }}</td>
+                                    <td class="text-center">{{ $product->stock_quantity }}</td>
+                                    <td class="text-center">{{ $product->minimum_stock }}</td>
+                                    <td class="text-end">₱{{ number_format($product->cost_price, 2) }}</td>
+                                    <td class="text-end">₱ {{ number_format($product->selling_price,2) }}</td>
+                                    <td class="text-end">₱
+                                        {{ number_format($product->stock_quantity * $product->selling_price, 2) }}</td>
+                                    <td class="text-center">
+                                        @if ($product->stock_quantity == 0)
+                                        <span class="badge bg-danger">Out of Stock</span>
+                                        @elseif($product->stock_quantity <= $product->minimum_stock)
+                                            <span class="badge bg-warning">Low Stocks</span>
+                                            @elseif($product->stock_quantity > $product->minimum_stock)
+                                            <span class="badge bg-success">Normal</span>
+                                            @endif
+                                    </td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -725,8 +669,8 @@ $repairNum = 1;
                             <div>Invoice: <span class="fw-semibold" id="repairSale_no"></span></div>
                         </div>
                     </div>
-                    <span class="badge bg-warning fs-6">
-                        In Progress
+                    <span class="badge bg-primary fs-6" id="repairStatus">
+
                     </span>
                 </div>
                 <hr>
@@ -752,9 +696,8 @@ $repairNum = 1;
                 </div>
                 <div class="border rounded p-3 mb-4">
                     <strong>Diagnosis</strong>
-                    <p class="mb-0 text-muted">
-                        Motherboard and PSU are fried due to power surge.
-                        Recommended replacement of PSU and motherboard.
+                    <p class="mb-0 text-muted" id="repairDiagnosis">
+                        .
                     </p>
                 </div>
                 <h6 class="mb-3">Parts Used</h6>
@@ -769,21 +712,8 @@ $repairNum = 1;
                                 <th width="15%">Subtotal</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td class="text-center">1</td>
-                                <td class="text-start">Corsair 650W PSU</td>
-                                <td class="text-center">1</td>
-                                <td class="text-end">₱2,500</td>
-                                <td class="text-end">₱2,500</td>
-                            </tr>
-                            <tr>
-                                <td class="text-center">2</td>
-                                <td class="text-start">ASUS B450 Motherboard</td>
-                                <td class="text-center">1</td>
-                                <td class="text-end">₱4,000</td>
-                                <td class="text-end">₱4,000</td>
-                            </tr>
+                        <tbody id="repairPartsTable">
+
                         </tbody>
                     </table>
                 </div>
@@ -792,8 +722,8 @@ $repairNum = 1;
                     <div class="col-md-6">
                         <div class="border rounded p-3 bg-light">
                             <strong>Repair Notes</strong>
-                            <p class="text-muted mb-0">
-                                Customer approved replacement of damaged components.
+                            <p class="text-muted mb-0" id="repairNotes">
+                                .
                             </p>
                         </div>
                     </div>
@@ -801,16 +731,16 @@ $repairNum = 1;
                         <div class="border rounded p-3 text-end">
                             <div class="mb-2">
                                 <strong>Labor Fee:</strong>
-                                <span>₱500</span>
+                                <span id="repairLaborFee"></span>
                             </div>
                             <div class="mb-2">
                                 <strong>Parts Total:</strong>
-                                <span>₱6,500</span>
+                                <span id="repairTotalPartsAmount"></span>
                             </div>
                             <hr>
                             <div class="fs-5">
                                 <strong>Total Amount:</strong>
-                                <span class="fw-bold text-success">₱7,000</span>
+                                <span class="fw-bold text-success" id="repairTotalAmount"></span>
                             </div>
                         </div>
                     </div>
@@ -863,12 +793,55 @@ $(document).ready(function() {
                 console.log(res);
                 let device_type = res.repair_info.device_type;
                 let formatDevice = device_type.replaceAll("_", " ");
+                // Convert to valid Date object
+                let rawDate = res.repair_info.created_at;
+                let formattedDate = new Date(rawDate.replace(' ', 'T'));
+                let format_date = formattedDate.toLocaleString('en-PH', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                });
 
                 $("#repair_no").text(res.repair_info.repair_no);
                 $("#repairSale_no").text(res.repair_info.invoice_no);
                 $("#repairDevice_type").text(formatDevice);
                 $("#repairCustomerName").text(res.repair_info.customer_name);
-                $("#repairDateCreated").text(res.repair_info.created_at);
+                $("#repairDateCreated").text(format_date);
+                $("#repairDiagnosis").text(res.repair_info.diagnosis);
+                $("#repairNotes").text(res.repair_info.notes);
+                $("#repairStatus").text(res.repair_info.status);
+                $("#repairLaborFee").text(
+                    res.repair_info.labor_fee.toLocaleString('en-PH', {
+                        style: 'currency',
+                        currency: 'PHP'
+                    }));
+                $("#repairTotalPartsAmount").text(
+                    res.repair_info.total_parts_amount.toLocaleString('en-PH', {
+                        style: 'currency',
+                        currency: 'PHP'
+                    }));
+                $("#repairTotalAmount").text(
+                    res.repair_info.total_amount.toLocaleString('en-PH', {
+                        style: 'currency',
+                        currency: 'PHP'
+                    }));
+
+                let repairPartsTable = $("#repairPartsTable");
+                repairPartsTable.empty();
+                $.each(res.repair_items, function(key, item) {
+                    repairPartsTable.append(`
+                    <tr>
+                        <td class="text-center">${key + 1}</td>
+                        <td class="text-start">${item.name}</td>
+                        <td class="text-center">${item.quantity}</td>
+                        <td class="text-end">₱${item.selling_price_snapshot.toLocaleString('en-PH')}</td>
+                        <td class="text-end">₱${item.subtotal.toLocaleString('en-PH')}</td>
+                    </tr>
+                    `)
+                });
             }
         });
     });
