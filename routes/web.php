@@ -70,7 +70,7 @@ Route::middleware('auth')->group(function(){
         // Route::get('/admin/reports/print-invoice', 'PrintInvoice')->name('print.invoice'); 
         Route::get('/admin/reports/print/invoice/date-range', 'GenerateDateRangeInvoice')->name('dateRange.invoice'); 
         Route::get('/admin/reports/print/product-sale/date-range', 'GenerateDateRangeProductSale')->name('dateRange.productSale'); 
-        Route::get('/admin/reports/print/low-stocks', 'GenerateLowStocksReport')->name('generate.lowStocks'); 
+        Route::get('/admin/reports/print/inventory-report', 'InventoryReportPrint')->name('inventory.report'); 
     });
 
     Route::controller(StocksController::class)->group(function(){

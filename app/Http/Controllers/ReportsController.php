@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Categories;
 use App\Models\Repairs;
 use App\Models\ReturnItems;
 use App\Models\Sales;
@@ -16,6 +17,7 @@ use Illuminate\Http\Request;
 class ReportsController extends Controller
 {
     public function ReportsIndex(){
+        $categories = Categories::all();
         $today = now()->toDateString();
 
         $today_sales = Sales::whereDate('completed_at', $today)
@@ -87,7 +89,7 @@ class ReportsController extends Controller
         ->join("categories", "categories.id", "=", "products.category_id")
         ->get();
 
-        return view('backend.reports', compact(
+        return view('backend.reports.reports', compact(
             'totalRevenue', 
             'totalProfit', 
             'totalTransactions', 
@@ -98,7 +100,8 @@ class ReportsController extends Controller
             'stockMove',
             'returns',
             'repairs',
-            'inventories'
+            'inventories',
+            'categories'
             ));
     }
 
@@ -171,6 +174,42 @@ class ReportsController extends Controller
             'repair_info'=>$repair_info,
             'repair_items'=>$repair_items,
         ]);
+    }
+
+    public function InventoryReportPrint(Request $request){
+        $category = $request->iCategory;
+        $status = $request->iStatus;
+
+        $inventories = Products::select(
+            'products.*',
+            'categories.category_name',
+        )
+        ->join("categories", "categories.id", "=", "products.category_id")
+        ->when($category, function ($query) use ($category) {
+            $query->where("products.category_id", $category);
+        })
+        ->when($status, function ($query) use ($status) {
+            if ($status == 'out') {
+                $query->where('stock_quantity', 0);
+            } elseif ($status == 'low') {
+                $query->whereColumn('stock_quantity', '<=', 'minimum_stock')
+                      ->where('stock_quantity', '>', 0);
+            } elseif ($status == 'normal') {
+                $query->whereColumn('stock_quantity', '>', 'minimum_stock');
+            }
+        })->get();
+
+        $totalProducts = $inventories->count();
+        $lowStocks = Products::whereColumn('stock_quantity', '<=', 'minimum_stock')
+                                ->count();
+        $outStocks = Products::where('stock_quantity', 0)->count();
+        
+        return view('backend.print.print_inventory_report', compact(
+            'inventories',
+            'totalProducts',
+            'lowStocks',
+            'outStocks',
+            ));
     }
 
     // public function PrintInvoice(Request $request){

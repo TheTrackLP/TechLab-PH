@@ -6,6 +6,10 @@ p {
     margin: 0;
     ;
 }
+
+label {
+    font-weight: bold;
+}
 </style>
 
 <head>
