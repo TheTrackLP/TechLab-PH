@@ -68,17 +68,14 @@ Route::middleware('auth')->group(function(){
         Route::get('/admin/reports/view-return/{id}', 'ViewRetunInfo'); 
         Route::get('/admin/reports/view-repair/info/{id}', 'ViewRepairInfo'); 
         // Route::get('/admin/reports/print-invoice', 'PrintInvoice')->name('print.invoice'); 
-        Route::get('/admin/reports/print/invoice/date-range', 'GenerateDateRangeInvoice')->name('dateRange.invoice'); 
-        Route::get('/admin/reports/print/product-sale/date-range', 'GenerateDateRangeProductSale')->name('dateRange.productSale'); 
         Route::get('/admin/reports/print/inventory-report', 'InventoryReportPrint')->name('inventory.report'); 
+        Route::get('/admin/reports/print/daterange-filter-report', 'DateRangeFilterReports')->name('daterange.filter'); 
     });
 
     Route::controller(StocksController::class)->group(function(){
         Route::get('/admin/stock-management/restock', 'RestockIndex')->name('restock.index');
         Route::get('/admin/product/getData/{id}', 'GetProductData');
         Route::post('/admin/product/restocks/save', 'RestockCompleted')->name('sales.store');
-        
-        Route::get('/admin/stock-management/print', 'GenerateDateRangeStockMovements')->name('dateRange.stockMovements');
     });
 
     Route::controller(RepairController::class)->group(function(){

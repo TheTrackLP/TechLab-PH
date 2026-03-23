@@ -16,8 +16,7 @@ $productNum = 1;
     <div class="card shadow-sm mb-5">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0">Sales Reports Filter</h5>
-                <small class="text-muted">Applies to Invoice & Product Sales Reports</small>
+                <h5 class="mb-0">Date Range Filter Reports</h5>
             </div>
             <div class="row g-3 align-items-end">
                 <div class="col-md-3">
@@ -30,21 +29,20 @@ $productNum = 1;
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Report Type</label>
-                    <select class="select2" id="reportType">
+                    <select class="select2" name="reportType" id="reportType">
                         <option></option>
-                        <option value="sales">Sales Report</option>
+                        <option value="sales">Invoice Report</option>
+                        <option value="products">Product Sale Report</option>
                         <option value="returns">Returns Report</option>
                         <option value="repairs">Repair Report</option>
-                        <option value="inventory">Inventory Report</option>
                         <option value="stock_movements">Stock Movement Report</option>
-                        <option value="low_stock">Low Stock Report</option>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label d-block invisible">Actions</label>
-                    <button class="btn btn-dark w-100" onclick="GenerateDateRangeInvoice()">
+                    <button class="btn btn-dark w-100" onclick="GenerateDateRangeReports()">
                         <i class="fa-solid fa-chart-column me-1"></i>
-                        Product Sales
+                        Genrate Date Range Report
                     </button>
                 </div>
             </div>
@@ -127,14 +125,9 @@ function GenerateDateRangeReports() {
     const fromDate = document.getElementById('fromDate').value;
     const toDate = document.getElementById('toDate').value;
     const reportType = document.getElementById('reportType').value;
-    if (!fromDate || !toDate && reportType) {
-        toastr.error("Error, Both Date are empty!");
-        return;
-    }
-    console.log(fromDate);
-    console.log(toDate);
-    console.log(reportType);
 
+    const url = `{{ route('daterange.filter') }}?fromDate=${fromDate}&toDate=${toDate}&reportType=${reportType}`;
+    printNewWindow(url);
 }
 
 function printNewWindow(url) {
