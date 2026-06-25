@@ -16,4 +16,5 @@ Route::controller(CategoriesController::class)->group(function(){
 
 Route::controller(SupplierController::class)->group(function(){
     Route::get('/suppliers', 'SupplierIndex')->name('supplier.index');
+    Route::post('/suppliers/store', 'SupplierStore')->name('supplier.store');
 });

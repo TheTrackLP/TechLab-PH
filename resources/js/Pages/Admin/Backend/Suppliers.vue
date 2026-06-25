@@ -1,5 +1,8 @@
 <script setup>
 import { useForm } from "@inertiajs/vue3";
+import { ref } from "vue";
+
+const supplierFormMode = ref('create');
 
 const supplierForm = useForm({
     id: "",
@@ -11,7 +14,38 @@ const supplierForm = useForm({
     notes: "",
 });
 
-const submit = () => supplierForm.post(route("supplier.store"));
+// const supplierTypeData = () => {
+//     id =  
+//     name =  
+//     supplier_type =  
+//     contact_person =  
+//     phone =  
+//     address =  
+//     notes =  
+// }
+
+const submit = () => {
+    if(supplierFormMode.value === 'create'){
+        supplierForm.post(route("supplier.store"), {
+            preserveScroll: true,
+            onSuccess: () =>{
+                supplierForm.reset();
+            }
+        });
+    } else {
+        supplierForm.post(route("supplier.update", supplierForm.id), {
+            preserveScroll: true,
+            onSuccess: () =>{
+                supplierForm.reset();
+            }
+        });
+    }
+}
+
+const props = defineProps({
+    suppliers: Array
+})
+
 </script>
 
 <script>
@@ -27,9 +61,45 @@ export default {
                 <form @submit.prevent="submit">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Category Form</h4>
+                            <h4>Supplier Form</h4>
                         </div>
-
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="">Supplier Name:</label>
+                                    <input type="text" v-model="supplierForm.name" class="form-control">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="">Supplier Type:</label>
+                                    <select v-model="supplierForm.supplier_type" class="form-control">
+                                        <option value="">Select Type</option>
+                                        <option value="distributor">Distributor</option>
+                                        <option value="online">Online</option>
+                                        <option value="local">Local</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="">Contact Person</label>
+                                    <input type="text" v-model="supplierForm.contact_person" class="form-control">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="">Phone</label>
+                                    <input type="text" v-model="supplierForm.phone" class="form-control">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group mb-3">
+                                    <label for="">Address</label>
+                                    <textarea v-model="supplierForm.address" rows="2" class="form-control"></textarea>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="">Notes</label>
+                                    <textarea v-model="supplierForm.notes" rows="2" class="form-control"></textarea>
+                                </div>
+                            </div>
+                        </div>
                         <div class="card-footer">
                             <button
                                 type="submit"
@@ -44,36 +114,32 @@ export default {
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header">
-                        <h4>Category Lists</h4>
+                        <h4>Supplier Lists</h4>
                     </div>
                     <div class="card-body">
                         <table class="table table-bordered table-hover">
                             <thead class="table-dark">
                                 <tr>
                                     <th class="text-center">#</th>
-                                    <th class="text-center">Category Name</th>
-                                    <th class="text-center">Description</th>
-                                    <th class="text-center">No. Products</th>
+                                    <th class="text-center">Supplier</th>
+                                    <th class="text-center">Contact</th>
+                                    <th class="text-center">Status</th>
                                     <th class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr
-                                    v-for="(cate, index) in categories"
-                                    :key="cate.id"
+                                    v-for="(supp, index) in suppliers"
+                                    :key="supp.id"
                                 >
                                     <td class="align-middle text-center">
                                         {{ index + 1 }}
                                     </td>
                                     <td class="align-middle">
-                                        <p>{{ cate.category_name }}</p>
+                                        <p>{{ supp.name }}</p>
                                     </td>
                                     <td class="align-middle">
-                                        <p>
-                                            <small>{{
-                                                cate.category_desc
-                                            }}</small>
-                                        </p>
+           
                                     </td>
                                     <td class="align-middle text-center">
                                         <span class="badge text-bg-primary"
