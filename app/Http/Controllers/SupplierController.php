@@ -31,4 +31,22 @@ class SupplierController extends Controller
             'success', 'Supplier Added Successfully',
         );
     }
+
+    public function SupplierUpdate(Request $request){
+        $valid = Validator::make($request->all(),[
+            'name' => 'required',
+            'supplier_type' => 'required',
+        ]);
+
+        if($valid->fails()){
+            return redirect()->route('supplier.index')->with(
+                'error', 'Error, Try Again!',
+            );
+        }
+            
+        Suppliers::create($request->all());
+        return redirect()->route('supplier.index')->with(
+            'success', 'Supplier Added Successfully',
+        );
+    }
 }
