@@ -2,10 +2,15 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [AdminController::class, 'AdminDashboard'])->name('admin.dash');
+
+Route::controller(ProductsController::class)->group(function(){
+    Route::get('/Products', 'ProductsIndex')->name('products.index');
+});
 
 Route::controller(CategoriesController::class)->group(function(){
     Route::get('/categories', 'CategoriesIndex')->name('category.index');
@@ -17,4 +22,5 @@ Route::controller(CategoriesController::class)->group(function(){
 Route::controller(SupplierController::class)->group(function(){
     Route::get('/suppliers', 'SupplierIndex')->name('supplier.index');
     Route::post('/suppliers/store', 'SupplierStore')->name('supplier.store');
+    Route::post('/suppliers/update/{id}', 'SupplierUpdate')->name('supplier.update');
 });
