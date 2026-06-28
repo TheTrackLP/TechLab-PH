@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
@@ -10,6 +11,13 @@ Route::get('/', [AdminController::class, 'AdminDashboard'])->name('admin.dash');
 
 Route::controller(ProductsController::class)->group(function(){
     Route::get('/Products', 'ProductsIndex')->name('products.index');
+    Route::post('/Products/store', 'ProductsStore')->name('products.store');
+    Route::post('/Products/update/{id}', 'ProductsUpdate')->name('products.update');
+    Route::post('/Products/update/product-status/{id}', 'ProductsUpdateStatus')->name('products.status');
+});
+
+Route::controller(SalesController::class)->group(function(){
+    Route::get('/sales/products', 'getProducts')->name('sales.index');
 });
 
 Route::controller(CategoriesController::class)->group(function(){

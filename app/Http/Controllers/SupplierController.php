@@ -44,9 +44,9 @@ class SupplierController extends Controller
             );
         }
             
-        Suppliers::create($request->all());
+        Suppliers::findorfail($request->id)->update($request->all());
         return redirect()->route('supplier.index')->with(
-            'success', 'Supplier Added Successfully',
+            'success', 'Supplier Updated Successfully',
         );
     }
 }

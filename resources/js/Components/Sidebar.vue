@@ -103,15 +103,15 @@ import { Link } from "@inertiajs/vue3";
                     </li>
                     <li class="nav-header">SALES</li>
                     <li class="nav-item">
-                        <a
-                            href="./generate/theme.html"
+                        <Link
+                            :href="route('sales.index')"
                             class="nav-link button-hover"
                         >
                             <div class="nav-icon">
                                 <i class="fa-solid fa-cash-register"></i>
                             </div>
                             <p>POS</p>
-                        </a>
+                        </Link>
                     </li>
                     <li class="nav-item">
                         <a
