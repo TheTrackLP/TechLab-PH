@@ -10,7 +10,6 @@ const amountPaid = ref("");
 const accordionOpen = ref(false);
 const selectedProductID = ref("");
 
-const getProductID = ref("");
 const getBrand = ref("");
 const getCategory = ref("");
 const getStocks = ref("");
@@ -123,11 +122,11 @@ const completedSale = () => {
         route("sales.store"),
         {
             products: cartProducts.value,
-            total: grandTotal.value,
             amount_paid: form.amountPaid,
             change: change.value,
         },
         {
+            preserveScroll: true,
             onSuccess: () => {
                 cartProducts.value = [];
                 form.amountPaid = 0;
@@ -143,15 +142,6 @@ const completedSale = () => {
 
 const calculateChange = () => {
     change.value = form.amountPaid - grandTotal.value;
-    if (change < 0) {
-        Swal.fire({
-            icon: "warning",
-            title: "Empty",
-            text: "Empty Cart.",
-        });
-        change.value = 0;
-        return;
-    }
 };
 
 const clearProductsCart = () => {
@@ -175,6 +165,7 @@ const clearProductsCart = () => {
             if (result.isConfirmed) {
                 cartProducts.value = [];
                 form.amountPaid = "";
+                change.value = "";
             }
         });
     }

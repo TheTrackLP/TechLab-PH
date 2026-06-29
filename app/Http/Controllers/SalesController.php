@@ -29,7 +29,6 @@ class SalesController extends Controller
 
         try {
             $products = $request->products;
-            $total = $request->total;
             $amountPaid = $request->amount_paid;
             $change = $request->change;
 
@@ -67,9 +66,6 @@ class SalesController extends Controller
                     'subtotal' => $subtotal,
                     'profit' => $profit,
                 ]);
-
-                $product->stock_quantity -= $item['qty'];
-                $product->save();
 
                 $product->stock_quantity -= $item['qty'];
                 $product->save();
