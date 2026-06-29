@@ -1,35 +1,136 @@
 <script setup>
-import { computed, nextTick, ref } from "vue";
+import { computed, ref } from "vue";
 import { Modal } from "bootstrap";
+import { currencyFormat, openModal } from "@/reuseables";
+import Swal from "sweetalert2";
+import { router } from "@inertiajs/vue3";
 
 const modalRef = ref(null);
-let modalInstance = null;
+const amountPaid = ref("");
+const accordionOpen = ref(false);
 const selectedProductID = ref("");
 const getBrand = ref("");
 const getCategory = ref("");
-
-const openShowProductModal = () => {
-    nextTick(() => {
-        modalInstance = new Modal(modalRef.value);
-        modalInstance.show();
-    });
-};
+const getStocks = ref("");
+const getMinStocks = ref("");
+const getSellingPrice = ref("");
+const getProductDesc = ref("");
 
 const openShowModal = (product) => {
     selectedProductID.value = product.id;
     getBrand.value = product.brand;
-    getCategory.value = product.category;
-
-    openShowProductModal();
+    getCategory.value = product.cat_name;
+    getStocks.value = product.stock_quantity;
+    getMinStocks.value = product.minimum_stock;
+    getSellingPrice.value = product.selling_price;
+    getProductDesc.value = product.description;
+    openModal(modalRef);
 };
 
-const showModalProduct = computed(() => {
+const form = () => {
+    amountPaid: "";
+};
+
+const getProductDetails = computed(() => {
     return (
         props.products.find(
             (product) => product.id == selectedProductID.value,
         ) || null
     );
 });
+
+const cartProducts = ref([]);
+const qty = ref(1);
+let total = ref(0);
+let change = ref(0);
+
+const addToCartProduct = (product) => {
+    selectedProductID.value = product.id;
+
+    if (!product) {
+        return;
+    }
+
+    const existing = cartProducts.value.find((item) => item.id == product.id);
+
+    if (existing) {
+        existing.qty += qty.value;
+    } else {
+        cartProducts.value.push({
+            id: product.id,
+            name: product.name,
+            selling_price: product.selling_price,
+            stock_quantity: product.stock_quantity,
+            qty: qty.value,
+        });
+    }
+};
+
+const itemSubtotal = (item) => {
+    return item.selling_price * item.qty;
+};
+
+const grandTotal = computed(() => {
+    return cartProducts.value.reduce((total, item) => {
+        return total + item.selling_price * item.qty;
+    }, 0);
+});
+
+const updateQty = (index, qty) => {
+    if (qty <= cartProducts.value[index].stock_quantity) {
+        cartProducts.value[index].qty = qty;
+    } else {
+        Swal.fire({
+            icon: "warning",
+            title: "Out of Stock",
+            text: "Not enough stock available.",
+            timer: 1000,
+        });
+    }
+};
+const removeFromCart = (item) => {
+    cartProducts.value.splice(item, 1);
+};
+
+const completedSale = () => {
+    if (cartProducts.value.length === 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "Empty Cart",
+            text: "Please add products to cart first.",
+        });
+        return;
+    }
+
+    if (form.amountPaid < grandTotal.value) {
+        Swal.fire({
+            icon: "warning",
+            title: "Insufficient Amount",
+            text: "Amount paid is less than the total.",
+        });
+        return;
+    }
+
+    router.post(
+        route("sales.store"),
+        {
+            products: cartProducts.value,
+            total: grandTotal.value,
+            amount_paid: form.amountPaid,
+        },
+        {
+            onSuccess: () => {
+                cartProducts.value = [];
+                amountPaid.value = 0;
+                Swal.fire({
+                    icon: "success",
+                    title: "Sale Complete!",
+                    text: "Transaction recorded successfully.",
+                });
+            },
+        },
+    );
+};
 
 const props = defineProps({
     products: Array,
@@ -72,7 +173,7 @@ export default {
                                             <img
                                                 src="/assets/img/no-image.png"
                                                 width="80"
-                                                class="rounded border mx-auto d-block border"
+                                                class="rounded border mx-auto d-block"
                                                 alt="{{ product.name }}"
                                             />
                                         </td>
@@ -104,7 +205,7 @@ export default {
                                                         <span
                                                             class="fw-semibold"
                                                             >{{
-                                                                product.sku
+                                                                product.stock_quantity
                                                             }}</span
                                                         >
                                                     </p>
@@ -114,12 +215,8 @@ export default {
                                         <td class="align-middle text-center">
                                             <p>
                                                 {{
-                                                    product.selling_price.toLocaleString(
-                                                        "en-PH",
-                                                        {
-                                                            style: "currency",
-                                                            currency: "PHP",
-                                                        },
+                                                    currencyFormat(
+                                                        product.selling_price,
                                                     )
                                                 }}
                                             </p>
@@ -137,6 +234,9 @@ export default {
                                             <button
                                                 type="button"
                                                 class="btn btn-primary"
+                                                @click="
+                                                    addToCartProduct(product)
+                                                "
                                             >
                                                 <i class="fa-solid fa-plus"></i>
                                             </button>
@@ -166,7 +266,50 @@ export default {
                                         <th width="50"></th>
                                     </tr>
                                 </thead>
-                                <tbody id="cartTableBody"></tbody>
+                                <tbody>
+                                    <tr
+                                        v-for="(item, index) in cartProducts"
+                                        :key="index"
+                                    >
+                                        <td>{{ item.name }}</td>
+                                        <td>
+                                            <input
+                                                type="number"
+                                                class="form-control form-control-sm"
+                                                :max="item.stock"
+                                                :value="item.qty"
+                                                @change="
+                                                    updateQty(
+                                                        index,
+                                                        $event.target.value,
+                                                    )
+                                                "
+                                            />
+                                        </td>
+                                        <td>
+                                            {{
+                                                currencyFormat(
+                                                    item.selling_price,
+                                                )
+                                            }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                currencyFormat(
+                                                    itemSubtotal(item),
+                                                )
+                                            }}
+                                        </td>
+                                        <td>
+                                            <button
+                                                @click="removeFromCart(item)"
+                                                class="btn btn-sm btn-danger"
+                                            >
+                                                X
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -174,10 +317,9 @@ export default {
                     <div class="card-body border-top">
                         <div class="d-flex justify-content-between">
                             <span>Total</span>
-                            <span
-                                class="fw-bold fs-5 text-primary"
-                                id="cartTotal"
-                            ></span>
+                            <span class="fw-bold fs-5 text-primary">{{
+                                currencyFormat(grandTotal)
+                            }}</span>
                         </div>
                         <hr />
                         <!-- Payment -->
@@ -186,7 +328,7 @@ export default {
                             <input
                                 type="number"
                                 class="form-control"
-                                id="amountPaid"
+                                v-model="form.amountPaid"
                             />
                         </div>
                         <div class="d-flex justify-content-between mb-3">
@@ -198,7 +340,10 @@ export default {
                             >
                         </div>
                         <div class="d-grid gap-2">
-                            <button class="btn btn-success" id="completeSale">
+                            <button
+                                class="btn btn-success"
+                                @click="completedSale"
+                            >
                                 Complete Sale
                             </button>
                             <button class="btn btn-outline-danger">
@@ -228,7 +373,7 @@ export default {
                     <div class="row">
                         <div class="col-md-5 text-center">
                             <img
-                                src="https://placehold.co/400x400?text=Product"
+                                src="/assets/img/no-image.png"
                                 class="img-fluid rounded border p-2 mb-3"
                                 alt="Product Image"
                             />
@@ -246,52 +391,46 @@ export default {
                             </div>
                             <div class="mb-2">
                                 <strong>Category:</strong>
-                                <span id="getCategory"></span>
+                                <span>{{ getCategory }}</span>
                             </div>
                             <div class="mb-2">
                                 <strong>Current Stock:</strong>
-                                <span id="getStocks"></span> pcs
-                            </div>
-                            <div class="mb-3">
-                                <strong>Selling Price:</strong>
                                 <span
-                                    class="fs-5 text-primary fw-bold"
-                                    id="getPrice"
-                                ></span>
+                                    v-if="getStocks > getMinStocks"
+                                    class="badge rounded-pill text-bg-success"
+                                    >{{ getStocks }}</span
+                                >
+                                <span
+                                    v-if="getStocks < getMinStocks"
+                                    class="badge rounded-pill text-bg-danger"
+                                    >{{ getStocks }}</span
+                                >
+                            </div>
+                            <div class="mb-2">
+                                <strong>Selling Price:</strong>
+                                <span class="text-success">{{
+                                    currencyFormat(getSellingPrice)
+                                }}</span>
                             </div>
                             <hr />
                             <div
-                                class="accordion accordion-flush"
-                                id="accordionFlushExample"
+                                class="p-3 d-flex justify-content-between align-items-center"
+                                style="cursor: pointer; background: #e8f0fe"
+                                @click="accordionOpen = !accordionOpen"
                             >
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header">
-                                        <button
-                                            class="accordion-button collapsed"
-                                            type="button"
-                                            data-bs-toggle="collapse"
-                                            data-bs-target="#flush-collapseOne"
-                                            aria-expanded="false"
-                                            aria-controls="flush-collapseOne"
-                                        >
-                                            Accordion Item #1
-                                        </button>
-                                    </h2>
-                                    <div
-                                        id="flush-collapseOne"
-                                        class="accordion-collapse collapse"
-                                        data-bs-parent="#accordionFlushExample"
-                                    >
-                                        <div class="accordion-body">
-                                            Placeholder content for this
-                                            accordion, which is intended to
-                                            demonstrate the
-                                            <code>.accordion-flush</code> class.
-                                            This is the first item’s accordion
-                                            body.
-                                        </div>
-                                    </div>
-                                </div>
+                                <span>Product Details</span>
+                                <i
+                                    :class="
+                                        accordionOpen
+                                            ? 'bi bi-chevron-up'
+                                            : 'bi bi-chevron-down'
+                                    "
+                                ></i>
+                            </div>
+                            <div v-if="accordionOpen" class="p-3 border">
+                                <small>
+                                    {{ getProductDesc }}
+                                </small>
                             </div>
                         </div>
                     </div>

@@ -18,6 +18,7 @@ Route::controller(ProductsController::class)->group(function(){
 
 Route::controller(SalesController::class)->group(function(){
     Route::get('/sales/products', 'getProducts')->name('sales.index');
+    Route::post('/sales/products/store', 'CompleteSale')->name('sales.store');
 });
 
 Route::controller(CategoriesController::class)->group(function(){

@@ -2,34 +2,29 @@
 import { Link, useForm } from "@inertiajs/vue3";
 import { Modal } from "bootstrap";
 import { nextTick, ref } from "vue";
+import { currencyFormat } from "@/reuseables";
 
 const modalRef = ref(null);
-const productsFormMode = ref('create');
+const productsFormMode = ref("create");
 let modalInstance = null;
 
-const openProductFormModal = () =>{
+const openProductFormModal = () => {
     nextTick(() => {
         modalInstance = new Modal(modalRef.value);
         modalInstance.show();
     });
-}
-
-const openProductModal = () => {
-    productsFormMode.value = 'create';
-    productsForm.reset();
-    openProductFormModal.show();
-}
+};
 
 const openCreateForm = () => {
-    productsFormMode.value = 'create';
+    productsFormMode.value = "create";
     productsForm.reset();
     openProductFormModal();
-}
+};
 
 const closeProductModalForm = () => {
     modalInstance?.hide();
     productsForm.reset();
-}
+};
 
 const productsForm = useForm({
     id: "",
@@ -46,7 +41,7 @@ const productsForm = useForm({
 });
 
 const getProductsData = (product) => {
-    productsFormMode.value = 'edit';
+    productsFormMode.value = "edit";
     productsForm.id = product.id;
     productsForm.category_id = product.category_id;
     productsForm.supplier_id = product.supplier_id;
@@ -59,7 +54,7 @@ const getProductsData = (product) => {
     productsForm.cost_price = product.cost_price;
     productsForm.selling_price = product.selling_price;
     openProductFormModal();
-}
+};
 const props = defineProps({
     products: Array,
     suppliers: Array,
@@ -67,29 +62,28 @@ const props = defineProps({
 });
 
 const changeStatus = (product) => {
-    productsForm.post(route('products.status', product.id));
-}
+    productsForm.post(route("products.status", product.id));
+};
 
 const submit = () => {
-    if(productsFormMode.value === 'create'){
-        productsForm.post(route('products.store'), {
+    if (productsFormMode.value === "create") {
+        productsForm.post(route("products.store"), {
             preserveScroll: true,
             onSuccess: () => {
                 productsForm.reset();
                 closeProductModalForm();
-            }
+            },
         });
     } else {
-        productsForm.post(route('products.update', productsForm.id), {
+        productsForm.post(route("products.update", productsForm.id), {
             preserveScroll: true,
             onSuccess: () => {
                 productsForm.reset();
                 closeProductModalForm();
-            }
+            },
         });
     }
-}
-
+};
 </script>
 
 <script>
@@ -128,8 +122,13 @@ export default {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="(product, index) in products" :key="index">
-                                <td class="text-center align-middle">{{ index + 1 }}</td>
+                            <tr
+                                v-for="(product, index) in products"
+                                :key="index"
+                            >
+                                <td class="text-center align-middle">
+                                    {{ index + 1 }}
+                                </td>
                                 <td class="text-center">
                                     <img
                                         class="p-1 bg-primary"
@@ -147,17 +146,40 @@ export default {
                                     {{ product.stock_quantity }}
                                 </td>
                                 <td class="text-center align-middle">
-                                    {{ product.selling_price.toLocaleString('en-PH',{
-                                        style: 'currency',
-                                        currency: 'PHP',
-                                    }) }}
+                                    {{ currencyFormat(product.selling_price) }}
                                 </td>
                                 <td class="text-center align-middle">
-                                    <span class="badge rounded-pill text-bg-danger" v-if="product.stock_quantity === 0">Out of Stock</span>
-                                    <span class="badge rounded-pill text-bg-success" v-else-if="product.stock_quantity > product.minimum_stock">Instock</span>
-                                    <span class="badge rounded-pill text-bg-warning" v-else-if="product.stock_quantity < product.minimum_stock">Low Stock</span>
-                                    <span class="badge rounded-pill text-bg-danger" v-if="product.is_active === 0">Inactive</span>
-                                    <span class="badge rounded-pill text-bg-success" v-else-if="product.is_active === 1">Active</span>
+                                    <span
+                                        class="badge rounded-pill text-bg-danger"
+                                        v-if="product.stock_quantity === 0"
+                                        >Out of Stock</span
+                                    >
+                                    <span
+                                        class="badge rounded-pill text-bg-success"
+                                        v-else-if="
+                                            product.stock_quantity >
+                                            product.minimum_stock
+                                        "
+                                        >Instock</span
+                                    >
+                                    <span
+                                        class="badge rounded-pill text-bg-warning"
+                                        v-else-if="
+                                            product.stock_quantity <
+                                            product.minimum_stock
+                                        "
+                                        >Low Stock</span
+                                    >
+                                    <span
+                                        class="badge rounded-pill text-bg-danger"
+                                        v-if="product.is_active === 0"
+                                        >Inactive</span
+                                    >
+                                    <span
+                                        class="badge rounded-pill text-bg-success"
+                                        v-else-if="product.is_active === 1"
+                                        >Active</span
+                                    >
                                 </td>
                                 <td class="text-center align-middle">
                                     <button
@@ -173,17 +195,19 @@ export default {
                                         type="button"
                                         class="btn btn-danger"
                                         @click="changeStatus(product)"
-                                        v-if="product.is_active === 0">
+                                        v-if="product.is_active === 0"
+                                    >
                                         <i class="fa-solid fa-circle-minus"></i>
                                     </button>
                                     <button
                                         type="button"
                                         class="btn btn-success"
                                         @click="changeStatus(product)"
-                                        v-else-if="product.is_active === 1">
+                                        v-else-if="product.is_active === 1"
+                                    >
                                         <i class="fa-solid fa-circle-plus"></i>
                                     </button>
-                              </td>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -200,8 +224,13 @@ export default {
                         <div class="modal-body">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h5 class="text-muted mb-3">Basic Information</h5>
-                                    <input type="hidden" v-model="productsForm.id">
+                                    <h5 class="text-muted mb-3">
+                                        Basic Information
+                                    </h5>
+                                    <input
+                                        type="hidden"
+                                        v-model="productsForm.id"
+                                    />
                                     <div class="form-group mb-3">
                                         <label for="">Product Name:</label>
                                         <input
@@ -232,10 +261,17 @@ export default {
                                         </div>
                                         <div class="col-md-6 form-group mb-3">
                                             <label for="">Category:</label>
-                                            <select class="form-select" v-model="productsForm.category_id">
+                                            <select
+                                                class="form-select"
+                                                v-model="
+                                                    productsForm.category_id
+                                                "
+                                            >
                                                 <option>Select Category</option>
                                                 <option
-                                                    v-for="(cate, index) in categories"
+                                                    v-for="(
+                                                        cate, index
+                                                    ) in categories"
                                                     :key="index"
                                                     :value="cate.id"
                                                 >
@@ -245,10 +281,17 @@ export default {
                                         </div>
                                         <div class="col-md-6 form-group mb-3">
                                             <label for="">Supplier:</label>
-                                            <select class="form-select" v-model="productsForm.supplier_id">
+                                            <select
+                                                class="form-select"
+                                                v-model="
+                                                    productsForm.supplier_id
+                                                "
+                                            >
                                                 <option>Select Supplier</option>
                                                 <option
-                                                    v-for="(supp, index) in suppliers"
+                                                    v-for="(
+                                                        supp, index
+                                                    ) in suppliers"
                                                     :key="index"
                                                     :value="supp.id"
                                                 >
@@ -266,7 +309,9 @@ export default {
                                                 type="number"
                                                 class="form-control"
                                                 placeholder="Enter Item Cost..."
-                                                v-model="productsForm.cost_price"
+                                                v-model="
+                                                    productsForm.cost_price
+                                                "
                                             />
                                         </div>
                                         <div class="col-md-6 form-group mb-3">
@@ -275,7 +320,9 @@ export default {
                                                 type="number"
                                                 class="form-control"
                                                 placeholder="Enter Selling Price..."
-                                                v-model="productsForm.selling_price"
+                                                v-model="
+                                                    productsForm.selling_price
+                                                "
                                             />
                                         </div>
                                     </div>
@@ -283,12 +330,16 @@ export default {
                                     <h5 class="text-muted mb-3">Inventory</h5>
                                     <div class="row">
                                         <div class="col-md-6 form-group mb-3">
-                                            <label for="">Stock Quantity:</label>
+                                            <label for=""
+                                                >Stock Quantity:</label
+                                            >
                                             <input
                                                 type="number"
                                                 class="form-control"
                                                 placeholder="Enter Stock..."
-                                                v-model="productsForm.stock_quantity"
+                                                v-model="
+                                                    productsForm.stock_quantity
+                                                "
                                             />
                                         </div>
                                         <div class="col-md-6 form-group mb-3">
@@ -297,7 +348,9 @@ export default {
                                                 type="number"
                                                 class="form-control"
                                                 placeholder="Enter Stock Minimum Stock"
-                                                v-model="productsForm.minimum_stock"
+                                                v-model="
+                                                    productsForm.minimum_stock
+                                                "
                                             />
                                         </div>
                                     </div>
@@ -327,7 +380,9 @@ export default {
                                             <textarea
                                                 class="form-control"
                                                 rows="13"
-                                                v-model="productsForm.description"
+                                                v-model="
+                                                    productsForm.description
+                                                "
                                             ></textarea>
                                         </div>
                                     </div>
@@ -335,9 +390,21 @@ export default {
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-danger" @click="closeProductModalForm">Close</button>
+                            <button
+                                type="button"
+                                class="btn btn-danger"
+                                @click="closeProductModalForm"
+                            >
+                                Close
+                            </button>
                             <button type="submit" class="btn btn-success px-4">
-                                {{ productsForm.processing ? 'Saving...' : productsFormMode === 'create' ? 'Add' : 'Update' }}
+                                {{
+                                    productsForm.processing
+                                        ? "Saving..."
+                                        : productsFormMode === "create"
+                                          ? "Add"
+                                          : "Update"
+                                }}
                             </button>
                         </div>
                     </div>
