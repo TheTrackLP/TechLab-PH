@@ -55,23 +55,23 @@ class SalesController extends Controller
                     throw new \Exception("Insufficient stock for {$product->name}");
                 }
                 
-                $subtotal = $item['quantity'] * $product->selling_price;
+                $subtotal = $item['qty'] * $product->selling_price;
                 $profit = ($product->selling_price - $product->cost_price) * $item['qty'];
 
                 SaleItems::create([
                     'sale_id' => $sale->id,
                     'product_id' => $product->id,
-                    'quantity' => $item['quantity'],
+                    'quantity' => $item['qty'],
                     'cost_price_snapshot' => $product->cost_price,
                     'selling_price_snapshot' => $product->selling_price,
                     'subtotal' => $subtotal,
                     'profit' => $profit,
                 ]);
 
-                $product->stock_quantity -= $item['quantity'];
+                $product->stock_quantity -= $item['qty'];
                 $product->save();
 
-                $product->stock_quantity -= $item['quantity'];
+                $product->stock_quantity -= $item['qty'];
                 $product->save();
 
                 $totalAmount += $subtotal;
@@ -80,7 +80,7 @@ class SalesController extends Controller
                 StockMovements::create([
                     'product_id' => $product->id,
                     'type' => 'sale',
-                    'quantity' => -$item['quantity'],
+                    'quantity' => -$item['qty'],
                     'reference_id' => $sale->id,
                     'notes' => null,
                     'created_by' => null,

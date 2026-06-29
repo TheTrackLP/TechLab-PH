@@ -3,12 +3,14 @@ import { computed, ref } from "vue";
 import { Modal } from "bootstrap";
 import { currencyFormat, openModal } from "@/reuseables";
 import Swal from "sweetalert2";
-import { router } from "@inertiajs/vue3";
+import { router, useForm } from "@inertiajs/vue3";
 
 const modalRef = ref(null);
 const amountPaid = ref("");
 const accordionOpen = ref(false);
 const selectedProductID = ref("");
+
+const getProductID = ref("");
 const getBrand = ref("");
 const getCategory = ref("");
 const getStocks = ref("");
@@ -27,9 +29,10 @@ const openShowModal = (product) => {
     openModal(modalRef);
 };
 
-const form = () => {
-    amountPaid: "";
-};
+const form = useForm({
+    amountPaid: "",
+    products: [],
+});
 
 const getProductDetails = computed(() => {
     return (
@@ -42,10 +45,12 @@ const getProductDetails = computed(() => {
 const cartProducts = ref([]);
 const qty = ref(1);
 let total = ref(0);
-let change = ref(0);
+let buttonSale = ref(false);
+const change = ref(0);
 
 const addToCartProduct = (product) => {
     selectedProductID.value = product.id;
+    buttonSale = true;
 
     if (!product) {
         return;
@@ -57,7 +62,7 @@ const addToCartProduct = (product) => {
         existing.qty += qty.value;
     } else {
         cartProducts.value.push({
-            id: product.id,
+            product_id: product.id,
             name: product.name,
             selling_price: product.selling_price,
             stock_quantity: product.stock_quantity,
@@ -90,6 +95,9 @@ const updateQty = (index, qty) => {
 };
 const removeFromCart = (item) => {
     cartProducts.value.splice(item, 1);
+    if (cartProducts.value.length === 0) {
+        buttonSale = false;
+    }
 };
 
 const completedSale = () => {
@@ -117,11 +125,12 @@ const completedSale = () => {
             products: cartProducts.value,
             total: grandTotal.value,
             amount_paid: form.amountPaid,
+            change: change.value,
         },
         {
             onSuccess: () => {
                 cartProducts.value = [];
-                amountPaid.value = 0;
+                form.amountPaid = 0;
                 Swal.fire({
                     icon: "success",
                     title: "Sale Complete!",
@@ -130,6 +139,45 @@ const completedSale = () => {
             },
         },
     );
+};
+
+const calculateChange = () => {
+    change.value = form.amountPaid - grandTotal.value;
+    if (change < 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "Empty",
+            text: "Empty Cart.",
+        });
+        change.value = 0;
+        return;
+    }
+};
+
+const clearProductsCart = () => {
+    if (cartProducts.value.length === 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "Empty",
+            text: "Empty Cart.",
+        });
+    } else {
+        Swal.fire({
+            title: "Clear Cart?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Yes, Clear it!",
+            cancelButtonText: "Cancel",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                cartProducts.value = [];
+                form.amountPaid = "";
+            }
+        });
+    }
 };
 
 const props = defineProps({
@@ -329,24 +377,27 @@ export default {
                                 type="number"
                                 class="form-control"
                                 v-model="form.amountPaid"
+                                @input="calculateChange"
                             />
                         </div>
                         <div class="d-flex justify-content-between mb-3">
                             <span>Change</span>
-                            <span
-                                class="fw-bold text-success"
-                                id="changeDisplay"
-                                >₱0.00</span
+                            <span class="fw-bold text-success">
+                                {{ currencyFormat(change) }}</span
                             >
                         </div>
                         <div class="d-grid gap-2">
                             <button
+                                v-if="buttonSale"
                                 class="btn btn-success"
                                 @click="completedSale"
                             >
                                 Complete Sale
                             </button>
-                            <button class="btn btn-outline-danger">
+                            <button
+                                class="btn btn-outline-danger"
+                                @click="clearProductsCart"
+                            >
                                 Cancel Sale
                             </button>
                         </div>
@@ -441,9 +492,6 @@ export default {
                         data-bs-dismiss="modal"
                     >
                         Close
-                    </button>
-                    <button class="btn btn-dark">
-                        <i class="fas fa-cart-plus me-1"></i> Add to Cart
                     </button>
                 </div>
             </div>
