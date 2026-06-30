@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\StocksController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +20,10 @@ Route::controller(ProductsController::class)->group(function(){
 Route::controller(SalesController::class)->group(function(){
     Route::get('/sales/products', 'getProducts')->name('sales.index');
     Route::post('/sales/products/store', 'CompleteSale')->name('sales.store');
+});
+
+Route::controller(StocksController::class)->group(function(){
+    Route::get('/restocks', 'RestockIndex')->name('stocks.index');
 });
 
 Route::controller(CategoriesController::class)->group(function(){

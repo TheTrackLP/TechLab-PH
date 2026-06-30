@@ -91,15 +91,15 @@ import { Link } from "@inertiajs/vue3";
                         </Link>
                     </li>
                     <li class="nav-item">
-                        <a
-                            href="./generate/theme.html"
+                        <Link
+                            :href="route('stocks.index')"
                             class="nav-link button-hover"
                         >
                             <div class="nav-icon">
                                 <i class="fa-solid fa-truck-loading"></i>
                             </div>
                             <p>Restock</p>
-                        </a>
+                        </Link>
                     </li>
                     <li class="nav-header">SALES</li>
                     <li class="nav-item">
