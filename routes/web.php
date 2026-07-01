@@ -24,6 +24,7 @@ Route::controller(SalesController::class)->group(function(){
 
 Route::controller(StocksController::class)->group(function(){
     Route::get('/restocks', 'RestockIndex')->name('stocks.index');
+    Route::post('/restocks/store', 'RestockIndex')->name('stocks.store');
 });
 
 Route::controller(CategoriesController::class)->group(function(){
