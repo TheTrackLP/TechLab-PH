@@ -31,9 +31,10 @@ class StocksController extends Controller
 
             $restocks = Restocks::create([
                 'supplier_id' => $supplier_id,
-                'reference_no' => null,
-                'total_items' => $totalItemsRestock,
-                'total_amount' => 0,
+                'supplier_or' => $referenceNo,
+                'reference_no' => 0,
+                'total_items' => $totalAmountRestock,
+                'total_amount' => $totalItemsRestock,
                 'notes' => $request->notes,
                 'created_by' => null,
                 'status' => 'completed',
@@ -53,12 +54,11 @@ class StocksController extends Controller
                 ]);
 
                 $addStock = $product->stock_quantity + $stocks['productNewQTY'];
-                $newCostPrice = $stocks['productNewCost'];
 
                 StockMovements::create([
                     'product_id' => $product->id,
-                    'type' => 'stocks',
-                    'quantity' => +$stocks['quantity'],
+                    'type' => 'restock',
+                    'quantity' => +$stocks['productNewQTY'],
                     'reference_id' => $restocks->id,
                     'notes' => null,
                     'created_by' => null,
@@ -84,7 +84,7 @@ class StocksController extends Controller
 
             $restocks->update([
                 'reference_no' => $reference,
-                'total_amount' => $newCostPrice,
+                'total_amount' => $totalAmountRestock,
             ]);
 
             DB::commit();
@@ -93,6 +93,8 @@ class StocksController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+    dd($e->getMessage());  // ✅ temporarily add this to see the real error
+
             return redirect()->route('stocks.index')->with(
                 'error', 'Error, Try Again!',
             );

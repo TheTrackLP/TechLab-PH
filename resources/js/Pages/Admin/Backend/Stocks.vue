@@ -62,45 +62,44 @@ const grandTotalRestockItems = computed(() => {
 });
 
 const completedRestock = () => {
-    if(cartRestock.value.length === 0){
+    if (cartRestock.value.length === 0) {
         Swal.fire({
             icon: "error",
             title: "Error!",
             text: "Fill up the Restock Items.",
-            timer: 1000,
+            timer: 2009,
         });
-    } else {
-        router.post(
-            route("stocks.store"),
-            {
-                restockProducts: cartRestock.value,
-                supplier_id: restockForm.supplier_id,
-                referenceNo: restockForm.referenceNo,
-                notes: restockForm.notes,
-                totalAmountRestock: grandTotalRestockItems.value,
-                totalItemsRestock: grandTotalRestock.value,
-            },
-            {
-                preserveScroll: true,
-                onSuccess: () => {
-                    cartRestock.value = [];
-                    restockForm.referenceNo = '',
-                    restockForm.supplier_id = '',
-                    restockForm.notes = '',
-                    restockQTY.value = '',
-                    restockAmount.value = '',
-                    restockAmount.value = '',
-                    selectProductid.value = '',
+        return;
+    }
+    router.post(
+        route("stocks.store"),
+        {
+            restockProducts: cartRestock.value,
+            supplier_id: restockForm.supplier_id,
+            referenceNo: restockForm.referenceNo,
+            notes: restockForm.notes,
+            totalAmountRestock: grandTotalRestockItems.value,
+            totalItemsRestock: grandTotalRestock.value,
+        },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                ((cartRestock.value = []),
+                    (restockForm.referenceNo = ""),
+                    (restockForm.supplier_id = ""),
+                    (restockForm.notes = ""),
+                    (restockQTY.value = ""),
+                    (restockAmount.value = ""),
+                    (selectProductid.value = ""),
                     Swal.fire({
                         icon: "success",
                         title: "Complete!",
                         text: "Product/s Restock Successfully.",
-                        timer: 1000,
-                    });
-                },
+                        timer: 2000,
+                    }));
             },
-        );
-    }
+        },
+    );
 };
 
 const props = defineProps({
@@ -295,7 +294,10 @@ export default {
                     </div>
                 </div>
                 <div class="text-end mt-3">
-                    <button class="btn btn-success px-4" @click="completedRestock"">
+                    <button
+                        class="btn btn-success px-4"
+                        @click="completedRestock"
+                    >
                         <i class="fa-solid fa-save me-1"></i>
                         Save Restock
                     </button>

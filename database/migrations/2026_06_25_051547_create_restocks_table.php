@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('restocks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('supplier_id');
+            $table->string('supplier_or');
             $table->string('reference_no')->nullable();
             $table->float('total_items');
             $table->float('total_amount');
