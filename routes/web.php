@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\ReturnsController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\StocksController;
 use App\Http\Controllers\SupplierController;
@@ -38,4 +39,9 @@ Route::controller(SupplierController::class)->group(function(){
     Route::get('/suppliers', 'SupplierIndex')->name('supplier.index');
     Route::post('/suppliers/store', 'SupplierStore')->name('supplier.store');
     Route::post('/suppliers/update/{id}', 'SupplierUpdate')->name('supplier.update');
+});
+
+Route::controller(ReturnsController::class)->group(function(){
+    Route::get('/returns', 'ReturnsIndex')->name('returns.index');
+    Route::get('/returns/sale-items/{id}', 'ReturnSaleItems');
 });
