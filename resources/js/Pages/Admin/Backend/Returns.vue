@@ -43,7 +43,15 @@ const searchSale = () => {
 const returnSubTotal = (items) => {
     return items.selling_price_snapshot * items.quantity;
 };
-const returnForm = useForm({});
+const returnForm = useForm({
+    returnReason: "",
+    returnType: "",
+    returnNote: "",
+});
+
+const addReturnItems = (items) => {
+    return items.product_name;
+};
 
 const props = defineProps({
     sales: Array,
@@ -166,21 +174,48 @@ export default {
                     <div class="row mb-3">
                         <div class="col-md-4">
                             <strong>Return Reason:</strong>
-                            <select name="" id="" class="form-select">
-                                <option value=""></option>
+                            <select
+                                v-model="returnForm.returnReason"
+                                class="form-select"
+                            >
+                                <option>Select an Option</option>
+                                <option value="defective">Defective</option>
+                                <option value="wrong_item">Wrong Item</option>
+                                <option value="change_mind">
+                                    Customer Changed Mind
+                                </option>
+                                <option value="damaged">Damaged</option>
                             </select>
                         </div>
                         <div class="col-md-4">
                             <strong>Return Type:</strong>
                             <select name="" id="" class="form-select">
-                                <option value=""></option>
+                                <option>Select on Option</option>
+                                <option class="refund">Refund</option>
+                                <option class="exchange">Exchange</option>
                             </select>
                         </div>
                         <div class="col-md-4">
                             <strong>Notes:</strong>
-                            <input type="text" class="form-control" />
+                            <input
+                                type="text"
+                                class="form-control"
+                                v-model="returnForm.returnNote"
+                            />
                         </div>
                     </div>
+                </div>
+                <div class="card-footer">
+                    <button type="button" class="btn btn-danger px-5">
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-success px-5 mx-3"
+                        @click="addReturnItems"
+                    >
+                        Save
+                    </button>
                 </div>
             </div>
         </div>
