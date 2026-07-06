@@ -43,7 +43,12 @@ const searchSale = () => {
 const returnSubTotal = (items) => {
     return items.selling_price_snapshot * items.quantity;
 };
-const returnForm = useForm({});
+const returnForm = useForm({
+returnReason: '',
+returnType: '',
+returnNote: '',
+
+});
 
 const props = defineProps({
     sales: Array,
@@ -166,19 +171,19 @@ export default {
                     <div class="row mb-3">
                         <div class="col-md-4">
                             <strong>Return Reason:</strong>
-                            <select name="" id="" class="form-select">
+                            <select v-model="returnForm.returnReason" class="form-select">
                                 <option value=""></option>
                             </select>
                         </div>
                         <div class="col-md-4">
                             <strong>Return Type:</strong>
-                            <select name="" id="" class="form-select">
+                            <select v-model="returnForm.returnType" class="form-select">
                                 <option value=""></option>
                             </select>
                         </div>
                         <div class="col-md-4">
                             <strong>Notes:</strong>
-                            <input type="text" class="form-control" />
+                            <input type="text" class="form-control" v-model="returnForm.returnNote"/>
                         </div>
                     </div>
                 </div>
