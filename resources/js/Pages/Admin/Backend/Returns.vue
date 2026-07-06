@@ -174,34 +174,19 @@ export default {
                     <div class="row mb-3">
                         <div class="col-md-4">
                             <strong>Return Reason:</strong>
-                            <select
-                                v-model="returnForm.returnReason"
-                                class="form-select"
-                            >
-                                <option>Select an Option</option>
-                                <option value="defective">Defective</option>
-                                <option value="wrong_item">Wrong Item</option>
-                                <option value="change_mind">
-                                    Customer Changed Mind
-                                </option>
-                                <option value="damaged">Damaged</option>
+                            <select name="" id="" class="form-select">
+                                <option value=""></option>
                             </select>
                         </div>
                         <div class="col-md-4">
                             <strong>Return Type:</strong>
                             <select name="" id="" class="form-select">
-                                <option>Select on Option</option>
-                                <option class="refund">Refund</option>
-                                <option class="exchange">Exchange</option>
+                                <option value=""></option>
                             </select>
                         </div>
                         <div class="col-md-4">
                             <strong>Notes:</strong>
-                            <input
-                                type="text"
-                                class="form-control"
-                                v-model="returnForm.returnNote"
-                            />
+                            <input type="text" class="form-control" />
                         </div>
                     </div>
                 </div>
