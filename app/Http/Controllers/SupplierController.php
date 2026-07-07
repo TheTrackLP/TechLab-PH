@@ -10,7 +10,7 @@ class SupplierController extends Controller
 {
     public function SupplierIndex(){
         return inertia('Admin/Backend/Suppliers', [
-            'suppliers'=>Suppliers::all(),
+            'suppliers'=>Suppliers::orderBy('id', 'desc')->paginate(5),
         ]);
     }
 

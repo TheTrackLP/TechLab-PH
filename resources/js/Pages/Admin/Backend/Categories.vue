@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { useForm, Link } from "@inertiajs/vue3";
 import { inject } from "vue";
+import Pagination from "@/Components/Pagination.vue";
 
 const deleteRecord = inject("deleteRecord");
 
@@ -40,7 +41,7 @@ const submit = () => {
 };
 
 const props = defineProps({
-    categories: Array,
+    categories: Object,
 });
 </script>
 
@@ -116,7 +117,7 @@ export default {
                             </thead>
                             <tbody>
                                 <tr
-                                    v-for="(cate, index) in categories"
+                                    v-for="(cate, index) in categories.data"
                                     :key="cate.id"
                                 >
                                     <td class="align-middle text-center">
@@ -165,6 +166,9 @@ export default {
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                    <div class="d-flex justify-content-center mt-3 mb-3">
+                        <Pagination :links="categories.links" />
                     </div>
                 </div>
             </div>

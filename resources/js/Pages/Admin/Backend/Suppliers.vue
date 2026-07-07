@@ -1,6 +1,7 @@
 <script setup>
 import { useForm } from "@inertiajs/vue3";
 import { ref } from "vue";
+import Pagination from "@/Components/Pagination.vue";
 
 const supplierFormMode = ref("create");
 
@@ -44,7 +45,7 @@ const submit = () => {
 };
 
 const props = defineProps({
-    suppliers: Array,
+    suppliers: Object,
 });
 </script>
 
@@ -164,7 +165,7 @@ export default {
                             </thead>
                             <tbody>
                                 <tr
-                                    v-for="(supp, index) in suppliers"
+                                    v-for="(supp, index) in suppliers.data"
                                     :key="supp.id"
                                 >
                                     <td class="align-middle text-center">
@@ -214,6 +215,9 @@ export default {
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                    <div class="d-flex justify-content-center my-3">
+                        <Pagination :links="suppliers.links" />
                     </div>
                 </div>
             </div>

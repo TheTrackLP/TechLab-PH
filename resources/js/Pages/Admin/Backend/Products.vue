@@ -3,6 +3,7 @@ import { Link, useForm } from "@inertiajs/vue3";
 import { Modal } from "bootstrap";
 import { nextTick, ref } from "vue";
 import { currencyFormat } from "@/reuseables";
+import Pagination from "@/Components/Pagination.vue";
 
 const modalRef = ref(null);
 const productsFormMode = ref("create");
@@ -56,7 +57,7 @@ const getProductsData = (product) => {
     openProductFormModal();
 };
 const props = defineProps({
-    products: Array,
+    products: Object,
     suppliers: Array,
     categories: Array,
 });
@@ -123,7 +124,7 @@ export default {
                         </thead>
                         <tbody>
                             <tr
-                                v-for="(product, index) in products"
+                                v-for="(product, index) in products.data"
                                 :key="index"
                             >
                                 <td class="text-center align-middle">
@@ -211,6 +212,9 @@ export default {
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <div class="d-flex justify-content-center mt-3 mb-3">
+                    <Pagination :links="products.links" />
                 </div>
             </div>
         </div>

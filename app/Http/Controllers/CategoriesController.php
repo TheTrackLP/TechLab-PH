@@ -10,7 +10,7 @@ class CategoriesController extends Controller
 {
     public function CategoriesIndex(){
         return inertia('Admin/Backend/Categories',[
-            'categories'=>Categories::all(),
+            'categories'=>Categories::orderBy('id', 'desc')->paginate(5),
         ]);
     }
 

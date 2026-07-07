@@ -12,7 +12,7 @@ class ProductsController extends Controller
 {
     public function ProductsIndex(){
         return inertia('Admin/Backend/Products', [
-            'products'=>Products::all(),
+            'products'=>Products::orderBy('id', 'desc')->paginate(5),
             'suppliers'=>Suppliers::all(),
             'categories'=>Categories::all(),
         ]);
