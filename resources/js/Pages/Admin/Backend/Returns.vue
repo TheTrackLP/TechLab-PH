@@ -1,14 +1,16 @@
 <script setup>
 import { computed, ref, watch } from "vue";
-import { useForm } from "@inertiajs/vue3";
+import { router, useForm } from "@inertiajs/vue3";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { currencyFormat } from "@/reuseables";
 
 const selectedSaleID = ref("");
+const selectedQTY = ref([]);
 const saleItems = ref([]);
 const selectedSale = ref(null);
 const selectedProductID = ref([]);
+const selectedReturnItems = ref([]);
 
 watch(selectedSale, (newValue) => {
     if (!newValue) return;
@@ -18,9 +20,17 @@ watch(selectedSale, (newValue) => {
 });
 const selectAllItems = (e) => {
     if (e.target.checked) {
-        selectedProductID.value = saleItems.value.map((p) => p.id);
+        selectedProductID.value = saleItems.value.map((p) => p);
     } else {
         selectedProductID.value = [];
+    }
+};
+
+const onCheck = (items, isChecked) => {
+    if (isChecked) {
+        selectedQTY.value[items.id] = 1;
+    } else {
+        delete selectedQTY.value[items.id];
     }
 };
 const searchSale = () => {
@@ -49,8 +59,31 @@ const returnForm = useForm({
     returnNote: "",
 });
 
-const addReturnItems = (items) => {
-    return items.product_name;
+const storeReturnItems = () => {
+    if (selectedProductID.value.length === 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "Empty!",
+            text: "Fill the Form First.",
+        });
+    } else {
+        selectedProductID.value.forEach((item) => {
+            selectedReturnItems.value.push({
+                id: item.id,
+                saleId: item.sale_id,
+                productId: item.product_id,
+                sellingPriceSnapshot: item.selling_price_snapshot,
+                returnQTY: selectedQTY.value[item.id],
+            });
+        });
+
+        router.post(route("return.store"), {
+            returnItems: selectedReturnItems.value,
+            returnReason: returnForm.returnReason,
+            returnType: returnForm.returnType,
+            returnNote: returnForm.returnNote,
+        });
+    }
 };
 
 const props = defineProps({
@@ -138,8 +171,15 @@ export default {
                                     <input
                                         class="form-check-input border border-success"
                                         type="checkbox"
-                                        :value="items.id"
+                                        :value="{
+                                            id: items.id,
+                                            sale_id: items.sale_id,
+                                            product_id: items.product_id,
+                                            selling_price_snapshot:
+                                                items.selling_price_snapshot,
+                                        }"
                                         v-model="selectedProductID"
+                                        @change="onCheck"
                                     />
                                 </td>
                                 <td>{{ items.product_name }}</td>
@@ -161,6 +201,7 @@ export default {
                                         type="number"
                                         :max="items.quantity"
                                         class="form-control"
+                                        v-model="selectedQTY[items.id]"
                                     />
                                 </td>
                             </tr>
@@ -178,7 +219,9 @@ export default {
                                 v-model="returnForm.returnReason"
                                 class="form-select"
                             >
-                                <option>Select an Option</option>
+                                <option value="" disabled>
+                                    Select an Option
+                                </option>
                                 <option value="defective">Defective</option>
                                 <option value="wrong_item">Wrong Item</option>
                                 <option value="change_mind">
@@ -193,7 +236,9 @@ export default {
                                 v-model="returnForm.returnType"
                                 class="form-select"
                             >
-                                <option>Select on Option</option>
+                                <option value="" disabled>
+                                    Select on Option
+                                </option>
                                 <option class="refund">Refund</option>
                                 <option class="exchange">Exchange</option>
                             </select>
@@ -215,7 +260,7 @@ export default {
                     <button
                         type="button"
                         class="btn btn-success px-5 mx-3"
-                        @click="addReturnItems"
+                        @click="storeReturnItems"
                     >
                         Save
                     </button>

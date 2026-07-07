@@ -44,4 +44,5 @@ Route::controller(SupplierController::class)->group(function(){
 Route::controller(ReturnsController::class)->group(function(){
     Route::get('/returns', 'ReturnsIndex')->name('returns.index');
     Route::get('/returns/sale-items/{id}', 'ReturnSaleItems');
+    Route::post('/returns/sale-items/store', 'ReturnItemsStore')->name('return.store');
 });

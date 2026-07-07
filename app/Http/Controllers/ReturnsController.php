@@ -25,4 +25,8 @@ class ReturnsController extends Controller
         ->get();
         return response()->json($items);
     }
+
+    public function ReturnItemsStore(Request $request){
+        dd($request->all());
+    }
 }

@@ -55,7 +55,7 @@ class SalesController extends Controller
                 }
                 
                 $subtotal = $item['qty'] * $product->selling_price;
-                $profit = ($product->selling_price - $product->cost_price) * $item['qty'];
+                $profit = ($product->cost_price - $product->selling_price) * $item['qty'];
 
                 SaleItems::create([
                     'sale_id' => $sale->id,
