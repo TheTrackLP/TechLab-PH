@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import { router, useForm } from "@inertiajs/vue3";
 import axios from "axios";
 import Swal from "sweetalert2";
