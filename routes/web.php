@@ -49,5 +49,7 @@ Route::controller(ReturnsController::class)->group(function(){
 });
 
 Route::controller(RepairsController::class)->group(function(){
-    Route::get('/reparis', 'RepairIndex')->name('repair.index');
+    Route::get('/repairs', 'RepairIndex')->name('repair.index');
+    Route::post('/repairs/store', 'RepairStore')->name('repair.store');
+    Route::get('/repairs/select-products/{id}', 'getCategoryProducts');
 });

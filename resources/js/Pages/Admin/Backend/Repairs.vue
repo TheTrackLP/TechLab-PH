@@ -1,3 +1,46 @@
+<script setup>
+import { Modal } from "bootstrap";
+import { openModal } from "@/reuseables";
+import { ref, watch } from "vue";
+import { useForm } from "@inertiajs/vue3";
+import axios from "axios";
+
+const modalRepariForm = ref(null);
+const modalDiagnoseForm = ref(null);
+const selectedCategory = ref(null);
+const productItems = ref([]);
+
+const repairForm = useForm({
+    customer_name: "",
+    contact_number: "",
+    device_type: "",
+    device_brand: "",
+    issue_description: "",
+});
+
+watch(selectedCategory, (newValue) => {
+    if (!newValue) return;
+    axios.get(`/repairs/select-products/${newValue.id}`).then((res) => {
+        productItems.value = res.data;
+    });
+});
+
+const openModalRepairForm = () => {
+    openModal(modalRepariForm);
+};
+
+const openModalDiagnoseForm = () => {
+    openModal(modalDiagnoseForm);
+};
+
+const repairSubmit = () => {
+    repairForm.post(route("repair.store"));
+};
+const props = defineProps({
+    categories: Array,
+});
+</script>
+
 <script>
 import AdminLayout from "@/Layouts/AdminLayout.vue";
 export default {
@@ -12,8 +55,7 @@ export default {
                 <div class="card-header">
                     <button
                         class="btn btn-primary px-4 float-end"
-                        data-bs-toggle="modal"
-                        data-bs-target="#modalRepairForm"
+                        @click="openModalRepairForm"
                     >
                         <i class="fa-solid fa-plus"></i>Add Repair
                     </button>
@@ -60,8 +102,7 @@ export default {
                                 <td class="text-center align-middle">
                                     <button
                                         class="btn btn-sm btn-info text-white me-1"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editRepairForm"
+                                        @click="openModalDiagnoseForm"
                                     >
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
@@ -72,10 +113,10 @@ export default {
                 </div>
             </div>
         </div>
-        <div class="modal fade" id="modalRepairForm" tabindex="-1">
-            <div class="modal-dialog modal-center">
+        <div class="modal fade" ref="modalRepariForm" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content">
-                    <form>
+                    <form @submit.prevent="repairSubmit">
                         <div class="modal-header bg-dark text-white">
                             Add Repair
                         </div>
@@ -83,15 +124,29 @@ export default {
                             <div class="row">
                                 <div class="col-md-6">
                                     <label>Customer Name:</label>
-                                    <input type="text" class="form-control" />
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        v-model="repairForm.customer_name"
+                                    />
                                 </div>
                                 <div class="col-md-6">
                                     <label>Contact Number:</label>
-                                    <input type="text" class="form-control" />
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        v-model="repairForm.contact_number"
+                                    />
                                 </div>
                                 <div class="col-md-6">
                                     <label>Device Type:</label>
-                                    <select class="form-select">
+                                    <select
+                                        class="form-select"
+                                        v-model="repairForm.device_type"
+                                    >
+                                        <option value="">
+                                            Select an Option
+                                        </option>
                                         <option value="laptop">Laptop</option>
                                         <option value="printer">Printer</option>
                                         <option value="desktop">Desktop</option>
@@ -101,20 +156,27 @@ export default {
                                 </div>
                                 <div class="col-md-6">
                                     <label>Device Brand/Model:</label>
-                                    <input type="text" class="form-control" />
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        v-model="repairForm.device_brand"
+                                    />
                                 </div>
                                 <div class="col-md-12">
-                                    <label>Contact Number:</label>
+                                    <label>Issue Description:</label>
                                     <textarea
                                         class="form-control"
                                         rows="4"
+                                        v-model="repairForm.issue_description"
                                     ></textarea>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button class="btn btn-danger px-3">Close</button>
-                            <button class="btn btn-success px-3">
+                            <button type="button" class="btn btn-danger px-3">
+                                Close
+                            </button>
+                            <button type="submit" class="btn btn-success px-3">
                                 Save Repair
                             </button>
                         </div>
@@ -122,116 +184,487 @@ export default {
                 </div>
             </div>
         </div>
-        <div class="modal fade" id="editRepairForm" tabindex="-1">
-            <div class="modal-dialog modal-center">
+        <div class="modal fade" ref="modalDiagnoseForm" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h4>Repair Details</h4>
+                    <div class="modal-header bg-dark">
+                        <h4 class="text-white">Repair Details</h4>
                     </div>
                     <div class="modal-body">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-sm-6">
-                                        <p><strong>Cusomter: </strong></p>
-                                        <p><strong>Contact: </strong></p>
-                                        <p><strong>Device: </strong></p>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <p><strong>Status: </strong></p>
-                                        <p><strong>Received: </strong></p>
-                                        <p><strong>Pickup Date: </strong></p>
-                                    </div>
-                                </div>
-                                <hr />
-                                <div class="form-group">
-                                    <p>Issue Description:</p>
-                                    <p></p>
-                                </div>
-                                <div class="form-group">
-                                    <p>Diagnosis</p>
-                                    <p></p>
-                                </div>
-                                <hr />
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div
-                                            class="bg-light p-3 rounded border"
-                                        >
-                                            <div
-                                                class="d-flex justify-content-between mb-2"
-                                            >
-                                                <span>Labor Fee</span>
-                                                <span
-                                                    class="labor_fee fw-semibold"
-                                                ></span>
+                        <ul
+                            class="nav nav-pills mb-3"
+                            id="pills-tab"
+                            role="tablist"
+                        >
+                            <li class="nav-item" role="presentation">
+                                <button
+                                    class="nav-link active"
+                                    id="pills-home-tab"
+                                    data-bs-toggle="pill"
+                                    data-bs-target="#pills-details"
+                                    type="button"
+                                    role="tab"
+                                    aria-controls="pills-home"
+                                    aria-selected="true"
+                                >
+                                    Repair Details
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button
+                                    class="nav-link"
+                                    id="pills-profile-tab"
+                                    data-bs-toggle="pill"
+                                    data-bs-target="#pills-diagnose"
+                                    type="button"
+                                    role="tab"
+                                    aria-controls="pills-profile"
+                                    aria-selected="false"
+                                >
+                                    Diagnose Details
+                                </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="pills-tabContent">
+                            <div
+                                class="tab-pane fade show active"
+                                id="pills-details"
+                                role="tabpanel"
+                                aria-labelledby="pills-home-tab"
+                                tabindex="0"
+                            >
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <p>
+                                                    <strong>Cusomter: </strong>
+                                                </p>
+                                                <p>
+                                                    <strong>Contact: </strong>
+                                                </p>
+                                                <p><strong>Device: </strong></p>
                                             </div>
-                                            <div
-                                                class="d-flex justify-content-between mb-2"
-                                            >
-                                                <span>Parts Total</span>
-                                                <span
-                                                    class="parts_amount fw-semibold"
-                                                ></span>
+                                            <div class="col-sm-6">
+                                                <p><strong>Status: </strong></p>
+                                                <p>
+                                                    <strong>Received: </strong>
+                                                </p>
+                                                <p>
+                                                    <strong
+                                                        >Pickup Date:
+                                                    </strong>
+                                                </p>
                                             </div>
-                                            <hr />
-                                            <div
-                                                class="d-flex justify-content-between mb-2"
-                                            >
-                                                <span>Change</span>
-                                                <span
-                                                    class="changeDisplayAmount fw-semibold"
-                                                    >P 0.00</span
+                                        </div>
+                                        <hr />
+                                        <div class="form-group">
+                                            <p>Issue Description:</p>
+                                            <p></p>
+                                        </div>
+                                        <div class="form-group">
+                                            <p>Diagnosis</p>
+                                            <p></p>
+                                        </div>
+                                        <hr />
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div
+                                                    class="bg-light p-3 rounded border"
                                                 >
+                                                    <div
+                                                        class="d-flex justify-content-between mb-2"
+                                                    >
+                                                        <span>Labor Fee</span>
+                                                        <span
+                                                            class="labor_fee fw-semibold"
+                                                        ></span>
+                                                    </div>
+                                                    <div
+                                                        class="d-flex justify-content-between mb-2"
+                                                    >
+                                                        <span>Parts Total</span>
+                                                        <span
+                                                            class="parts_amount fw-semibold"
+                                                        ></span>
+                                                    </div>
+                                                    <hr />
+                                                    <div
+                                                        class="d-flex justify-content-between mb-2"
+                                                    >
+                                                        <span>Change</span>
+                                                        <span
+                                                            class="changeDisplayAmount fw-semibold"
+                                                            >P 0.00</span
+                                                        >
+                                                    </div>
+                                                    <hr />
+                                                    <div
+                                                        class="d-flex justify-content-between fs-5"
+                                                    >
+                                                        <strong
+                                                            >Total
+                                                            Amount</strong
+                                                        >
+                                                        <strong
+                                                            class="overallAmount text-success"
+                                                        ></strong>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <hr />
-                                            <div
-                                                class="d-flex justify-content-between fs-5"
-                                            >
-                                                <strong>Total Amount</strong>
-                                                <strong
-                                                    class="overallAmount text-success"
-                                                ></strong>
+                                            <div class="col-md-6">
+                                                <div
+                                                    class="bg-white p-3 rounded border"
+                                                >
+                                                    <div class="mb-3">
+                                                        <label
+                                                            class="form-label"
+                                                            >Payment Type</label
+                                                        >
+                                                        <select
+                                                            class="form-select"
+                                                            id="payment_type"
+                                                        >
+                                                            <option
+                                                                value="cash"
+                                                            >
+                                                                Cash
+                                                            </option>
+                                                            <option
+                                                                value="gcash"
+                                                            >
+                                                                GCash
+                                                            </option>
+                                                            <option
+                                                                value="bank_transfer"
+                                                            >
+                                                                Bank Transfer
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label
+                                                            class="form-label"
+                                                            >Amount Paid</label
+                                                        >
+                                                        <input
+                                                            type="number"
+                                                            step="0.01"
+                                                            class="form-control"
+                                                            id="amount_paid"
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                </div>
+                            </div>
+                            <div
+                                class="tab-pane fade"
+                                id="pills-diagnose"
+                                role="tabpanel"
+                                aria-labelledby="pills-profile-tab"
+                                tabindex="0"
+                            >
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="">Diagnosis</label>
+                                            <textarea
+                                                rows="5"
+                                                class="form-control border-secondary"
+                                            ></textarea>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label for="">Labor Fee</label>
+                                            <input
+                                                type="number"
+                                                class="form-control border-secondary"
+                                            />
+                                        </div>
+                                        <hr />
+                                        <h6 class="mb-3">Add Parts</h6>
                                         <div
-                                            class="bg-white p-3 rounded border"
+                                            class="d-flex justify-content-between align-items-center mb-3"
                                         >
-                                            <div class="mb-3">
+                                            <h6 class="mb-0 fw-bold">
+                                                <i
+                                                    class="fa-solid fa-screwdriver-wrench me-2 text-primary"
+                                                ></i>
+                                                Add / Modify Parts
+                                            </h6>
+                                            <button
+                                                type="button"
+                                                class="btn btn-outline-secondary btn-sm"
+                                                id="currentPartsPreview"
+                                            >
+                                                <i
+                                                    class="fa-solid fa-eye me-1"
+                                                ></i>
+                                                View Current Parts
+                                            </button>
+                                        </div>
+                                        <div
+                                            class="row g-3 align-items-end mb-4"
+                                        >
+                                            <div class="col-md-3">
                                                 <label class="form-label"
-                                                    >Payment Type</label
+                                                    >Category</label
                                                 >
                                                 <select
-                                                    class="form-select"
-                                                    id="payment_type"
+                                                    class="form-select border-secondary"
+                                                    v-model="selectedCategory"
+                                                    @change="show"
                                                 >
-                                                    <option value="cash">
-                                                        Cash
-                                                    </option>
-                                                    <option value="gcash">
-                                                        GCash
+                                                    <option value="">
+                                                        Select an Option
                                                     </option>
                                                     <option
-                                                        value="bank_transfer"
+                                                        v-for="(
+                                                            items, index
+                                                        ) in categories"
+                                                        :key="index"
+                                                        :value="items"
                                                     >
-                                                        Bank Transfer
+                                                        {{
+                                                            items.category_name
+                                                        }}
                                                     </option>
                                                 </select>
                                             </div>
-                                            <div class="mb-3">
+                                            <div class="col-md-3">
                                                 <label class="form-label"
-                                                    >Amount Paid</label
+                                                    >Product</label
+                                                >
+                                                <select
+                                                    class="form-select border-secondary"
+                                                >
+                                                    <option value="">
+                                                        Select an Option
+                                                    </option>
+                                                    <option
+                                                        v-for="(
+                                                            product, index
+                                                        ) in productItems"
+                                                        :key="index"
+                                                        :value="product"
+                                                    >
+                                                        {{ product.name }}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label"
+                                                    >Qty</label
                                                 >
                                                 <input
                                                     type="number"
-                                                    step="0.01"
-                                                    class="form-control"
-                                                    id="amount_paid"
+                                                    id="quantity"
+                                                    class="form-control border-secondary"
+                                                    min="1"
                                                 />
                                             </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label"
+                                                    >Unit Price</label
+                                                >
+                                                <input
+                                                    type="text"
+                                                    id="unit_price"
+                                                    class="form-control border-secondary"
+                                                    readonly
+                                                />
+                                            </div>
+                                            <div class="col-md-2 d-grid">
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-dark"
+                                                    id="addRepairParts"
+                                                >
+                                                    <i
+                                                        class="fa-solid fa-plus me-1"
+                                                    ></i>
+                                                    Add Part
+                                                </button>
+                                            </div>
                                         </div>
+                                        <table
+                                            class="table table-bordered table-hover"
+                                        >
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th class="text-center">
+                                                        Product
+                                                    </th>
+                                                    <th class="text-center">
+                                                        Qty
+                                                    </th>
+                                                    <th class="text-center">
+                                                        Unit Price
+                                                    </th>
+                                                    <th class="text-center">
+                                                        Subtotal
+                                                    </th>
+                                                    <th class="text-center">
+                                                        Action
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <th>1</th>
+                                                    <td
+                                                        class="text-center align-middle"
+                                                    >
+                                                        Mark
+                                                    </td>
+                                                    <td
+                                                        class="text-center align-middle"
+                                                    >
+                                                        Otto
+                                                    </td>
+                                                    <td
+                                                        class="text-center align-middle"
+                                                    >
+                                                        @mdo
+                                                    </td>
+                                                    <td
+                                                        class="text-center align-middle"
+                                                    >
+                                                        asd
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <hr />
+                                        <div class="row mt-4 g-4">
+                                            <div class="col-md-6">
+                                                <div
+                                                    class="card border-0 shadow-sm bg-light h-100"
+                                                >
+                                                    <div class="card-body">
+                                                        <h6
+                                                            class="fw-bold text-muted mb-3"
+                                                        >
+                                                            <i
+                                                                class="fa-solid fa-receipt me-2 text-secondary"
+                                                            ></i>
+                                                            Current Saved Amount
+                                                        </h6>
+                                                        <div
+                                                            class="d-flex justify-content-between mb-2"
+                                                        >
+                                                            <span
+                                                                >Labor
+                                                                Fee:</span
+                                                            >
+                                                            <span
+                                                                class="fw-semibold text-dark labor_fee"
+                                                            >
+                                                            </span>
+                                                        </div>
+                                                        <div
+                                                            class="d-flex justify-content-between mb-2"
+                                                        >
+                                                            <span
+                                                                >Parts
+                                                                Total:</span
+                                                            >
+                                                            <span
+                                                                class="fw-semibold text-dark parts_amount"
+                                                            >
+                                                            </span>
+                                                        </div>
+                                                        <hr />
+                                                        <div
+                                                            class="d-flex justify-content-between fs-5"
+                                                        >
+                                                            <strong
+                                                                >Total
+                                                                Amount:</strong
+                                                            >
+                                                            <strong
+                                                                class="text-secondary overallAmount"
+                                                            >
+                                                            </strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div
+                                                    class="card border-0 shadow-sm border-start border-4 border-success h-100"
+                                                >
+                                                    <div class="card-body">
+                                                        <h6
+                                                            class="fw-bold text-success mb-3"
+                                                        >
+                                                            <i
+                                                                class="fa-solid fa-pen-to-square me-2"
+                                                            ></i>
+                                                            New Estimated Amount
+                                                        </h6>
+                                                        <div
+                                                            class="d-flex justify-content-between mb-2"
+                                                        >
+                                                            <span
+                                                                >Labor
+                                                                Fee:</span
+                                                            >
+                                                            <span
+                                                                class="fw-semibold"
+                                                                id="laborFeePreview"
+                                                            >
+                                                            </span>
+                                                        </div>
+
+                                                        <div
+                                                            class="d-flex justify-content-between mb-2"
+                                                        >
+                                                            <span
+                                                                >Parts
+                                                                Total:</span
+                                                            >
+                                                            <span
+                                                                class="fw-semibold"
+                                                                id="partsTotalPreview"
+                                                            >
+                                                            </span>
+                                                        </div>
+                                                        <hr />
+                                                        <div
+                                                            class="d-flex justify-content-between fs-5"
+                                                        >
+                                                            <strong
+                                                                >Total
+                                                                Amount:</strong
+                                                            >
+                                                            <strong
+                                                                class="text-success"
+                                                                id="overallTotalPreview"
+                                                            >
+                                                            </strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-footer">
+                                        <button
+                                            class="btn btn-danger mr-4"
+                                            data-bs-dismiss="modal"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            id="saveRepair"
+                                            class="btn btn-success"
+                                        >
+                                            Save Diagnosis
+                                        </button>
                                     </div>
                                 </div>
                             </div>
