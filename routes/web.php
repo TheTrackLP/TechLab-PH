@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\RepairsController;
 use App\Http\Controllers\ReturnsController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\StocksController;
@@ -45,4 +46,8 @@ Route::controller(ReturnsController::class)->group(function(){
     Route::get('/returns', 'ReturnsIndex')->name('returns.index');
     Route::get('/returns/sale-items/{id}', 'ReturnSaleItems');
     Route::post('/returns/sale-items/store', 'ReturnItemsStore')->name('return.store');
+});
+
+Route::controller(RepairsController::class)->group(function(){
+    Route::get('/reparis', 'RepairIndex')->name('repair.index');
 });

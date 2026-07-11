@@ -10,3 +10,6 @@ td,
 p {
     margin: 0 !important;
 }
+:root {
+    --app-sidebar-width: 430px !important;
+}

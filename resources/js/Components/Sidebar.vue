@@ -126,15 +126,15 @@ import { Link } from "@inertiajs/vue3";
                     </li>
                     <li class="nav-header">SERVICES</li>
                     <li class="nav-item">
-                        <a
-                            href="./generate/theme.html"
+                        <Link
+                            :href="route('repair.index')"
                             class="nav-link button-hover"
                         >
                             <div class="nav-icon">
                                 <i class="fa-solid fa-tools"></i>
                             </div>
                             <p>Repairs</p>
-                        </a>
+                        </Link>
                     </li>
                     <li class="nav-header">REPORTS</li>
                     <li class="nav-item">

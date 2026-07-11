@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ReturnItems;
 use App\Models\SaleItems;
 use App\Models\Sales;
 use App\Models\Returns;
 use App\Models\Products;
+use App\Models\StockMovements;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ReturnsController extends Controller
 {
@@ -32,10 +35,10 @@ class ReturnsController extends Controller
         DB::BeginTransaction();
 
         try {
-            $returnItems => $request->returnItems,
-            $returnReason => $request->returnReason,
-            $returnType => $request->returnType,
-            $returnNote => $request->returnNote,
+            $returnItems = $request->returnItems;
+            $returnReason = $request->returnReason;
+            $returnType = $request->returnType;
+            $returnNote = $request->returnNote;
 
             $return = Returns::create([
             'sale_id' => null,
@@ -49,7 +52,7 @@ class ReturnsController extends Controller
 
             $totalAmount = 0;
 
-            foreach ($item as $returnItems) {
+            foreach ($returnItems as $item) {
                 $product_id = Products::lockForUpdate()->findorfail($item['product_id']);
                 $subTotal = $item['selling_price_snapshot'] * $item['selectedQTY'];
 
