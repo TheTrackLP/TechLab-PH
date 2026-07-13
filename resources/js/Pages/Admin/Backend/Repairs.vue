@@ -1,6 +1,6 @@
 <script setup>
 import { Modal } from "bootstrap";
-import { openModal } from "@/reuseables";
+import { openModal, currencyFormat } from "@/reuseables";
 import { ref, watch } from "vue";
 import { useForm } from "@inertiajs/vue3";
 import axios from "axios";
@@ -9,6 +9,16 @@ const modalRepariForm = ref(null);
 const modalDiagnoseForm = ref(null);
 const selectedCategory = ref(null);
 const productItems = ref([]);
+const showAddParts = ref(false);
+
+const getCustomer = ref("");
+const getContact = ref("");
+const getDevice = ref("");
+const getStatus = ref("");
+const getReceivedDate = ref("");
+const getPickupDate = ref("");
+const getRepairNo = ref("");
+const getIssueDesc = ref("");
 
 const repairForm = useForm({
     customer_name: "",
@@ -29,7 +39,15 @@ const openModalRepairForm = () => {
     openModal(modalRepariForm);
 };
 
-const openModalDiagnoseForm = () => {
+const openModalDiagnoseForm = (repair) => {
+    getRepairNo.value = repair.repair_no;
+    getCustomer.value = repair.customer_name;
+    getContact.value = repair.contact_number;
+    getDevice.value = repair.device_type;
+    getStatus.value = repair.status;
+    getIssueDesc.value = repair.issue_description;
+    getReceivedDate.value = repair.created_at;
+    getPickupDate.value = repair.pickup_deadline;
     openModal(modalDiagnoseForm);
 };
 
@@ -38,6 +56,7 @@ const repairSubmit = () => {
 };
 const props = defineProps({
     categories: Array,
+    repairs: Array,
 });
 </script>
 
@@ -67,7 +86,7 @@ export default {
                             <tr>
                                 <th class="text-center">#</th>
                                 <th class="text-center">Repair No.</th>
-                                <th class="text-center">Customer</th>
+                                <th class="text-center">Customer Details</th>
                                 <th class="text-center">Device</th>
                                 <th class="text-center">Total Amount</th>
                                 <th class="text-center">Status</th>
@@ -77,32 +96,89 @@ export default {
                         </thead>
 
                         <tbody>
-                            <tr>
+                            <tr v-for="(repair, index) in repairs" :key="index">
                                 <td class="text-center align-middle">
-                                    <p></p>
+                                    <p>{{ index + 1 }}</p>
                                 </td>
                                 <td class="text-center align-middle">
-                                    <p></p>
+                                    <p>{{ repair.repair_no }}</p>
+                                </td>
+                                <td class="align-middle">
+                                    <p>
+                                        <strong>Name: </strong
+                                        >{{ repair.customer_name }}
+                                    </p>
+                                    <p>
+                                        <strong>Contact: </strong
+                                        >{{ repair.contact_number }}
+                                    </p>
+                                </td>
+                                <td class="align-middle">
+                                    <p>
+                                        {{ repair.device_type }} |
+                                        {{ repair.device_brand }}
+                                    </p>
                                 </td>
                                 <td class="text-center align-middle">
-                                    <p></p>
+                                    <p>
+                                        {{
+                                            currencyFormat(repair.total_amount)
+                                        }}
+                                    </p>
                                 </td>
                                 <td class="text-center align-middle">
-                                    <p></p>
+                                    <span
+                                        class="badge rounded-pill text-bg-secondary"
+                                        v-if="
+                                            repair.status == 'pending_diagnosis'
+                                        "
+                                        >{{ repair.status }}</span
+                                    >
+                                    <span
+                                        class="badge rounded-pill text-bg-info"
+                                        v-else-if="
+                                            repair.status == 'awaiting_approval'
+                                        "
+                                        >{{ repair.status }}</span
+                                    >
+                                    <span
+                                        class="badge rounded-pill text-bg-primary"
+                                        v-else-if="
+                                            repair.status == 'in_progress'
+                                        "
+                                        >{{ repair.status }}</span
+                                    >
+                                    <span
+                                        class="badge rounded-pill text-bg-success"
+                                        v-else-if="repair.status == 'completed'"
+                                        >{{ repair.status }}</span
+                                    >
+                                    <span
+                                        class="badge rounded-pill text-bg-dark"
+                                        v-else-if="repair.status == 'released'"
+                                        >{{ repair.status }}</span
+                                    >
+                                    <span
+                                        class="badge rounded-pill text-bg-warning"
+                                        v-else-if="repair.status == 'cancelled'"
+                                        >{{ repair.status }}</span
+                                    >
+                                    <span
+                                        class="badge rounded-pill text-bg-danger"
+                                        v-else-if="repair.status == 'abandoned'"
+                                        >{{ repair.status }}</span
+                                    >
                                 </td>
                                 <td class="text-center align-middle">
-                                    <p></p>
-                                </td>
-                                <td class="text-center align-middle">
-                                    <p></p>
-                                </td>
-                                <td class="text-center align-middle">
-                                    <p></p>
+                                    <p v-if="repair.pickup_deadline">
+                                        {{ repair.pickup_deadline }}
+                                    </p>
+                                    <p v-else="">Awaiting</p>
                                 </td>
                                 <td class="text-center align-middle">
                                     <button
                                         class="btn btn-sm btn-info text-white me-1"
-                                        @click="openModalDiagnoseForm"
+                                        @click="openModalDiagnoseForm(repair)"
                                     >
                                         <i class="fa-solid fa-eye"></i>
                                     </button>
@@ -188,7 +264,9 @@ export default {
             <div class="modal-dialog modal-dialog-centered modal-xl">
                 <div class="modal-content">
                     <div class="modal-header bg-dark">
-                        <h4 class="text-white">Repair Details</h4>
+                        <h4 class="text-white">
+                            Repair Details <span>{{ getRepairNo }}</span>
+                        </h4>
                     </div>
                     <div class="modal-body">
                         <ul
@@ -238,32 +316,123 @@ export default {
                                         <div class="row">
                                             <div class="col-sm-6">
                                                 <p>
-                                                    <strong>Cusomter: </strong>
+                                                    <strong
+                                                        >Cusomter:
+                                                        {{
+                                                            getCustomer
+                                                        }}</strong
+                                                    >
                                                 </p>
                                                 <p>
-                                                    <strong>Contact: </strong>
+                                                    <strong
+                                                        >Contact:
+                                                        {{ getContact }}</strong
+                                                    >
                                                 </p>
-                                                <p><strong>Device: </strong></p>
+                                                <p>
+                                                    <strong
+                                                        >Device:
+                                                        {{ getDevice }}</strong
+                                                    >
+                                                </p>
                                             </div>
                                             <div class="col-sm-6">
-                                                <p><strong>Status: </strong></p>
                                                 <p>
-                                                    <strong>Received: </strong>
+                                                    <strong>Status: </strong>
+                                                    <span
+                                                        class="badge rounded-pill text-bg-secondary"
+                                                        v-if="
+                                                            getStatus ==
+                                                            'pending_diagnosis'
+                                                        "
+                                                        >{{ getStatus }}</span
+                                                    >
+                                                    <span
+                                                        class="badge rounded-pill text-bg-info"
+                                                        v-else-if="
+                                                            getStatus ==
+                                                            'awaiting_approval'
+                                                        "
+                                                        >{{ getStatus }}</span
+                                                    >
+                                                    <span
+                                                        class="badge rounded-pill text-bg-primary"
+                                                        v-else-if="
+                                                            getStatus.status ==
+                                                            'in_progress'
+                                                        "
+                                                        >{{ getStatus }}</span
+                                                    >
+                                                    <span
+                                                        class="badge rounded-pill text-bg-success"
+                                                        v-else-if="
+                                                            getStatus ==
+                                                            'completed'
+                                                        "
+                                                        >{{ getStatus }}</span
+                                                    >
+                                                    <span
+                                                        class="badge rounded-pill text-bg-dark"
+                                                        v-else-if="
+                                                            getStatus ==
+                                                            'released'
+                                                        "
+                                                        >{{ getStatus }}</span
+                                                    >
+                                                    <span
+                                                        class="badge rounded-pill text-bg-warning"
+                                                        v-else-if="
+                                                            getStatus ==
+                                                            'cancelled'
+                                                        "
+                                                        >{{ getStatus }}</span
+                                                    >
+                                                    <span
+                                                        class="badge rounded-pill text-bg-danger"
+                                                        v-else-if="
+                                                            getStatus ==
+                                                            'abandoned'
+                                                        "
+                                                        >{{ getStatus }}</span
+                                                    >
+                                                </p>
+                                                <p>
+                                                    <strong
+                                                        >Received:
+                                                        {{
+                                                            getReceivedDate
+                                                        }}</strong
+                                                    >
                                                 </p>
                                                 <p>
                                                     <strong
                                                         >Pickup Date:
+                                                        <span
+                                                            v-if="getPickupDate"
+                                                            >{{
+                                                                getPickupDate
+                                                            }}</span
+                                                        >
+                                                        <span v-else=""
+                                                            >Awaiting</span
+                                                        >
                                                     </strong>
                                                 </p>
                                             </div>
                                         </div>
                                         <hr />
                                         <div class="form-group">
-                                            <p>Issue Description:</p>
-                                            <p></p>
+                                            <p>
+                                                <strong
+                                                    >Issue Description:</strong
+                                                >
+                                            </p>
+                                            <p class="text-secondary">
+                                                {{ getIssueDesc }}
+                                            </p>
                                         </div>
                                         <div class="form-group">
-                                            <p>Diagnosis</p>
+                                            <p><strong>Diagnosis</strong></p>
                                             <p></p>
                                         </div>
                                         <hr />
@@ -384,159 +553,176 @@ export default {
                                             />
                                         </div>
                                         <hr />
-                                        <h6 class="mb-3">Add Parts</h6>
-                                        <div
-                                            class="d-flex justify-content-between align-items-center mb-3"
-                                        >
-                                            <h6 class="mb-0 fw-bold">
-                                                <i
-                                                    class="fa-solid fa-screwdriver-wrench me-2 text-primary"
-                                                ></i>
-                                                Add / Modify Parts
-                                            </h6>
-                                            <button
-                                                type="button"
-                                                class="btn btn-outline-secondary btn-sm"
-                                                id="currentPartsPreview"
+                                        <div class="form-check">
+                                            <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                id="checkDefault"
+                                                v-model="showAddParts"
+                                            />
+                                            <label
+                                                class="form-check-label"
+                                                for="checkDefault"
                                             >
-                                                <i
-                                                    class="fa-solid fa-eye me-1"
-                                                ></i>
-                                                View Current Parts
-                                            </button>
+                                                Show Add Parts
+                                            </label>
                                         </div>
-                                        <div
-                                            class="row g-3 align-items-end mb-4"
-                                        >
-                                            <div class="col-md-3">
-                                                <label class="form-label"
-                                                    >Category</label
-                                                >
-                                                <select
-                                                    class="form-select border-secondary"
-                                                    v-model="selectedCategory"
-                                                    @change="show"
-                                                >
-                                                    <option value="">
-                                                        Select an Option
-                                                    </option>
-                                                    <option
-                                                        v-for="(
-                                                            items, index
-                                                        ) in categories"
-                                                        :key="index"
-                                                        :value="items"
-                                                    >
-                                                        {{
-                                                            items.category_name
-                                                        }}
-                                                    </option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label class="form-label"
-                                                    >Product</label
-                                                >
-                                                <select
-                                                    class="form-select border-secondary"
-                                                >
-                                                    <option value="">
-                                                        Select an Option
-                                                    </option>
-                                                    <option
-                                                        v-for="(
-                                                            product, index
-                                                        ) in productItems"
-                                                        :key="index"
-                                                        :value="product"
-                                                    >
-                                                        {{ product.name }}
-                                                    </option>
-                                                </select>
-                                            </div>
-                                            <div class="col-md-2">
-                                                <label class="form-label"
-                                                    >Qty</label
-                                                >
-                                                <input
-                                                    type="number"
-                                                    id="quantity"
-                                                    class="form-control border-secondary"
-                                                    min="1"
-                                                />
-                                            </div>
-                                            <div class="col-md-2">
-                                                <label class="form-label"
-                                                    >Unit Price</label
-                                                >
-                                                <input
-                                                    type="text"
-                                                    id="unit_price"
-                                                    class="form-control border-secondary"
-                                                    readonly
-                                                />
-                                            </div>
-                                            <div class="col-md-2 d-grid">
+                                        <div v-show="showAddParts">
+                                            <h6 class="mb-3">Add Parts</h6>
+                                            <div
+                                                class="d-flex justify-content-between align-items-center mb-3"
+                                            >
+                                                <h6 class="mb-0 fw-bold">
+                                                    <i
+                                                        class="fa-solid fa-screwdriver-wrench me-2 text-primary"
+                                                    ></i>
+                                                    Add / Modify Parts
+                                                </h6>
                                                 <button
                                                     type="button"
-                                                    class="btn btn-dark"
-                                                    id="addRepairParts"
+                                                    class="btn btn-outline-secondary btn-sm"
+                                                    id="currentPartsPreview"
                                                 >
                                                     <i
-                                                        class="fa-solid fa-plus me-1"
+                                                        class="fa-solid fa-eye me-1"
                                                     ></i>
-                                                    Add Part
+                                                    View Current Parts
                                                 </button>
                                             </div>
+                                            <div
+                                                class="row g-3 align-items-end mb-4"
+                                            >
+                                                <div class="col-md-3">
+                                                    <label class="form-label"
+                                                        >Category</label
+                                                    >
+                                                    <select
+                                                        class="form-select border-secondary"
+                                                        v-model="
+                                                            selectedCategory
+                                                        "
+                                                    >
+                                                        <option value="">
+                                                            Select an Option
+                                                        </option>
+                                                        <option
+                                                            v-for="(
+                                                                items, index
+                                                            ) in categories"
+                                                            :key="index"
+                                                            :value="items"
+                                                        >
+                                                            {{
+                                                                items.category_name
+                                                            }}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label"
+                                                        >Product</label
+                                                    >
+                                                    <select
+                                                        class="form-select border-secondary"
+                                                    >
+                                                        <option value="">
+                                                            Select an Option
+                                                        </option>
+                                                        <option
+                                                            v-for="(
+                                                                product, index
+                                                            ) in productItems"
+                                                            :key="index"
+                                                            :value="product"
+                                                        >
+                                                            {{ product.name }}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label"
+                                                        >Qty</label
+                                                    >
+                                                    <input
+                                                        type="number"
+                                                        id="quantity"
+                                                        class="form-control border-secondary"
+                                                        min="1"
+                                                    />
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label"
+                                                        >Unit Price</label
+                                                    >
+                                                    <input
+                                                        type="text"
+                                                        id="unit_price"
+                                                        class="form-control border-secondary"
+                                                        readonly
+                                                    />
+                                                </div>
+                                                <div class="col-md-2 d-grid">
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-dark"
+                                                        id="addRepairParts"
+                                                    >
+                                                        <i
+                                                            class="fa-solid fa-plus me-1"
+                                                        ></i>
+                                                        Add Part
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <table
+                                                class="table table-bordered table-hover"
+                                            >
+                                                <thead class="table-dark">
+                                                    <tr>
+                                                        <th class="text-center">
+                                                            Product
+                                                        </th>
+                                                        <th class="text-center">
+                                                            Qty
+                                                        </th>
+                                                        <th class="text-center">
+                                                            Unit Price
+                                                        </th>
+                                                        <th class="text-center">
+                                                            Subtotal
+                                                        </th>
+                                                        <th class="text-center">
+                                                            Action
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <th>1</th>
+                                                        <td
+                                                            class="text-center align-middle"
+                                                        >
+                                                            Mark
+                                                        </td>
+                                                        <td
+                                                            class="text-center align-middle"
+                                                        >
+                                                            Otto
+                                                        </td>
+                                                        <td
+                                                            class="text-center align-middle"
+                                                        >
+                                                            @mdo
+                                                        </td>
+                                                        <td
+                                                            class="text-center align-middle"
+                                                        >
+                                                            asd
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
-                                        <table
-                                            class="table table-bordered table-hover"
-                                        >
-                                            <thead class="table-dark">
-                                                <tr>
-                                                    <th class="text-center">
-                                                        Product
-                                                    </th>
-                                                    <th class="text-center">
-                                                        Qty
-                                                    </th>
-                                                    <th class="text-center">
-                                                        Unit Price
-                                                    </th>
-                                                    <th class="text-center">
-                                                        Subtotal
-                                                    </th>
-                                                    <th class="text-center">
-                                                        Action
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <th>1</th>
-                                                    <td
-                                                        class="text-center align-middle"
-                                                    >
-                                                        Mark
-                                                    </td>
-                                                    <td
-                                                        class="text-center align-middle"
-                                                    >
-                                                        Otto
-                                                    </td>
-                                                    <td
-                                                        class="text-center align-middle"
-                                                    >
-                                                        @mdo
-                                                    </td>
-                                                    <td
-                                                        class="text-center align-middle"
-                                                    >
-                                                        asd
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
                                         <hr />
                                         <div class="row mt-4 g-4">
                                             <div class="col-md-6">

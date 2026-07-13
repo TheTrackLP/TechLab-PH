@@ -13,6 +13,7 @@ class RepairsController extends Controller
     public function RepairIndex(){
         return inertia('Admin/Backend/Repairs', [
             'categories'=>Categories::all(),
+            'repairs'=>Repairs::all(),
         ]);
     }
 
