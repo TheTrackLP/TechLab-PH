@@ -18,3 +18,11 @@ export const openModal = (modalRef) => {
         modalInstance.show();
     });
 };
+
+export const closeModal = (modalRef) => {
+    nextTick(() => {
+        if (!modalRef) return;
+        const modalInstance = Modal.getInstance(modalRef.value);
+        if (modalInstance) modalInstance.hide();
+    });
+};

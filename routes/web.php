@@ -52,4 +52,6 @@ Route::controller(RepairsController::class)->group(function(){
     Route::get('/repairs', 'RepairIndex')->name('repair.index');
     Route::post('/repairs/store', 'RepairStore')->name('repair.store');
     Route::get('/repairs/select-products/{id}', 'getCategoryProducts');
+    Route::post('/repairs/update/{id}', 'RepairUpdate')->name('repair.update');
+    Route::post('/repairs/update/change-status/{id}', 'ChangeRepairStatus')->name('repair.status');
 });
