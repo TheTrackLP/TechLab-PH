@@ -544,7 +544,9 @@ export default {
                                                         <strong
                                                             class="text-success"
                                                             >{{
-                                                                overallAmount
+                                                                currencyFormat(
+                                                                    overallAmount,
+                                                                )
                                                             }}</strong
                                                         >
                                                     </div>
@@ -650,7 +652,7 @@ export default {
                                                         class="btn btn-danger"
                                                         @click="
                                                             repairChangeStatus(
-                                                                'Cancel',
+                                                                'cancelled',
                                                             )
                                                         "
                                                     >
@@ -669,6 +671,11 @@ export default {
                                                     <button
                                                         type="button"
                                                         class="btn btn-success"
+                                                        @click="
+                                                            repairChangeStatus(
+                                                                'completed',
+                                                            )
+                                                        "
                                                     >
                                                         <i
                                                             class="fa-solid fa-circle-check me-1"
@@ -684,6 +691,11 @@ export default {
                                                     <button
                                                         type="button"
                                                         class="btn btn-info text-white"
+                                                        @click="
+                                                            repairChangeStatus(
+                                                                'released',
+                                                            )
+                                                        "
                                                     >
                                                         <i
                                                             class="fa-solid fa-box-open me-1"
@@ -693,7 +705,11 @@ export default {
                                                     <button
                                                         type="button"
                                                         class="btn btn-secondary"
-                                                        data-value="abandoned"
+                                                        @click="
+                                                            repairChangeStatus(
+                                                                'abandoned',
+                                                            )
+                                                        "
                                                     >
                                                         <i
                                                             class="fa-solid fa-clock me-1"
@@ -709,8 +725,11 @@ export default {
                                                     <button
                                                         type="button"
                                                         class="btn btn-warning text-dark"
-                                                        data-value="generate_sale"
-                                                        disabled
+                                                        @click="
+                                                            repairChangeStatus(
+                                                                'generate_sale',
+                                                            )
+                                                        "
                                                     >
                                                         <i
                                                             class="fa-solid fa-receipt me-1"

@@ -109,6 +109,14 @@ class RepairsController extends Controller
             $repair_id->update([
                 'status'=>$changeStatus,
             ]);
+        } elseif ($changeStatus == 'completed') {
+            $repair_id->update([
+                'status'=>$changeStatus,
+            ]);
+        } elseif ($changeStatus == 'released') {
+            $repair_id->update([
+                'status'=>$changeStatus,
+            ]); 
         }
 
         return redirect()->route('repair.index')->with(
