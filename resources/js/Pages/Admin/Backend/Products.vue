@@ -1,12 +1,19 @@
 <script setup>
 import { Link, useForm } from "@inertiajs/vue3";
 import { Modal } from "bootstrap";
-import { nextTick, ref } from "vue";
+import { computed, nextTick, ref, watch } from "vue";
 import { currencyFormat } from "@/reuseables";
 import Pagination from "@/Components/Pagination.vue";
 
+const props = defineProps({
+    products: Object,
+    suppliers: Array,
+    categories: Array,
+});
+
 const modalRef = ref(null);
 const productsFormMode = ref("create");
+const categoryFilter = ref(null);
 let modalInstance = null;
 
 const openProductFormModal = () => {
@@ -56,10 +63,11 @@ const getProductsData = (product) => {
     productsForm.selling_price = product.selling_price;
     openProductFormModal();
 };
-const props = defineProps({
-    products: Object,
-    suppliers: Array,
-    categories: Array,
+
+const filteredProducts = computed(() => {
+    return props.products.data.filter(
+        (p) => p.category_id === categoryFilter.value?.id,
+    );
 });
 
 const changeStatus = (product) => {
@@ -109,6 +117,25 @@ export default {
                     <h4>Product Lists</h4>
                 </div>
                 <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label for="">Catgory</label>
+                            <select
+                                class="form-select"
+                                v-model="categoryFilter"
+                            >
+                                <option value="">Select an Option</option>
+                                <option
+                                    v-for="(cate, index) in categories"
+                                    :key="index"
+                                    :value="cate"
+                                >
+                                    {{ cate.category_name }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <hr />
                     <table class="table table-bordered table-hover">
                         <thead class="table-dark">
                             <tr>
@@ -141,7 +168,7 @@ export default {
                                     <p>{{ product.name }}</p>
                                 </td>
                                 <td class="text-center align-middle">
-                                    {{ product.category_id }}
+                                    {{ product.category_name }}
                                 </td>
                                 <td class="text-center align-middle">
                                     {{ product.stock_quantity }}

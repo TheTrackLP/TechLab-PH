@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Categories;
 use App\Models\Products;
 use App\Models\SaleItems;
 use App\Models\Sales;
@@ -21,6 +22,7 @@ class SalesController extends Controller
                     ->get();
         return inertia('Admin/Backend/Sales', [
             'products'=>$products,
+            'categories'=>Categories::all(),
         ]);
     }
 

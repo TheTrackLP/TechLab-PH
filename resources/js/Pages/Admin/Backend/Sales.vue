@@ -9,6 +9,7 @@ const modalRef = ref(null);
 const amountPaid = ref("");
 const accordionOpen = ref(false);
 const selectedProductID = ref("");
+const selectedCategory = ref("");
 
 const getBrand = ref("");
 const getCategory = ref("");
@@ -33,11 +34,9 @@ const form = useForm({
     products: [],
 });
 
-const getProductDetails = computed(() => {
-    return (
-        props.products.find(
-            (product) => product.id == selectedProductID.value,
-        ) || null
+const filteredProducts = computed(() => {
+    return props.products.filter(
+        (p) => p.category_id === selectedCategory.value,
     );
 });
 
@@ -173,7 +172,10 @@ const clearProductsCart = () => {
 
 const props = defineProps({
     products: Array,
+    categories: Array,
 });
+
+console.log(filteredProducts.value);
 </script>
 
 <script>
@@ -192,6 +194,27 @@ export default {
                             <h4>Point of Sale</h4>
                         </div>
                         <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="">Category</label>
+                                    <select
+                                        v-model="selectedCategory"
+                                        class="form-select"
+                                    >
+                                        <option value="">
+                                            Selec an Option
+                                        </option>
+                                        <option
+                                            :value="cate"
+                                            v-for="(cate, index) in categories"
+                                            :key="index"
+                                        >
+                                            {{ cate.category_name }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <hr />
                             <table class="table table-bordered table-hover">
                                 <thead class="table-dark">
                                     <tr>
